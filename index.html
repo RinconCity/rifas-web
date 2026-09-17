@@ -20,9 +20,13 @@
         #syncIndicator { position: fixed; bottom: 20px; right: 20px; padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,0.7); display: none; z-index: 100; font-size: 0.75rem; color: #a78bfa; }
         .bounce-notif { animation: bounceNotif 1s infinite; }
         @keyframes bounceNotif { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; box-shadow: 0 10px 15px rgba(0,0,0,0.3); display: none; z-index: 200; }
     </style>
 </head>
 <body class="text-white">
+
+    <!-- TOAST PARA NOTIFICACIONES NO BLOQUEANTES -->
+    <div id="toast"></div>
 
     <!-- LOGIN -->
     <div id="loginScreen" class="w-full max-w-md mx-auto text-center relative z-10 py-10">
@@ -264,6 +268,13 @@
         const passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
         const syncIndicator = document.getElementById('syncIndicator');
+        const toast = document.getElementById('toast');
+
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3500);
+        }
 
         // --- LOGIN UNIFICADO ---
         async function attemptLogin() {
@@ -312,7 +323,7 @@
                 currentUser.password = newPass;
                 saveDataToGitHub();
                 document.getElementById('clientSettingsModal').classList.add('hidden');
-                alert("Contraseña guardada.");
+                showToast("Contraseña guardada.");
             }
         });
 
@@ -337,8 +348,8 @@
 
         document.getElementById('btnPhotoPc').addEventListener('click', () => document.getElementById('newUserPhotoPc').click());
         document.getElementById('btnPhotoCam').addEventListener('click', () => document.getElementById('newUserPhotoCam').click());
-        document.getElementById('newUserPhotoPc').addEventListener('change', async (e) => { tempNewUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); alert("Foto cargada"); });
-        document.getElementById('newUserPhotoCam').addEventListener('change', async (e) => { tempNewUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); alert("Foto tomada"); });
+        document.getElementById('newUserPhotoPc').addEventListener('change', async (e) => { tempNewUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); showToast("Foto cargada"); });
+        document.getElementById('newUserPhotoCam').addEventListener('change', async (e) => { tempNewUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); showToast("Foto tomada"); });
 
         document.getElementById('createUserBtn').addEventListener('click', () => {
             const nombre = document.getElementById('newUserName').value.trim();
@@ -351,7 +362,7 @@
             saveDataToGitHub();
             document.getElementById('newUserName').value = ''; document.getElementById('newUserPhone').value = '+53'; tempNewUserPhoto = null;
             renderUsers(); renderAdminView(); 
-            alert(`Cliente creado. Su ID es: ${newId}`);
+            showToast(`Cliente creado. ID: ${newId}`);
         });
 
         function renderUsers() {
@@ -390,6 +401,7 @@
             editUserView.classList.add('hidden');
             clientsView.classList.remove('hidden');
             renderUsers(); renderAdminView();
+            showToast("Cambios guardados.");
         });
 
         document.getElementById('deleteUserBtn').addEventListener('click', () => {
@@ -449,12 +461,10 @@
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
-        // --- SINCRONIZACIÓN AUTOMÁTICA (CORREGIDA Y CON ALERTAS) ---
+        // --- SINCRONIZACIÓN AUTOMÁTICA (ULTRA RÁPIDA Y NO BLOQUEANTE) ---
         async function syncData() {
             if (!currentSha || isSaving || !currentUser) return;
-            syncIndicator.style.display = 'block';
             try {
-                // Agregado cache-buster para evitar que el navegador devuelva datos viejos
                 const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
                     headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' } 
                 });
@@ -462,7 +472,6 @@
                 const data = await res.json();
                 
                 if (data.sha !== currentSha) {
-                    // Hay datos nuevos en GitHub
                     let prevPendientes = {};
                     db.rifas.forEach(r => prevPendientes[r.id] = r.solicitudes ? r.solicitudes.length : 0);
                     
@@ -470,9 +479,8 @@
                     db = JSON.parse(content) || { rifas: [], usuarios: [] };
                     db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; if(r.transitionTime === undefined) r.transitionTime = 3000; });
                     db.usuarios.forEach(u => { if(!u.password) u.password = ""; });
-                    currentSha = data.sha; // FIX CRÍTICO: Actualizar el SHA correctamente
+                    currentSha = data.sha; 
                     
-                    // Verificar si hay nuevas solicitudes para alertar al admin
                     let newRequests = false;
                     if (currentUser.role === 'admin') {
                         db.rifas.forEach(r => {
@@ -483,13 +491,13 @@
                     refreshCurrentView(); 
                     
                     if (newRequests && currentUser.role === 'admin') {
-                        alert("🔔 ¡Tienes nuevas solicitudes de participación en tus rifas!");
+                        showToast("🔔 ¡Tienes nuevas solicitudes de participación!");
                     }
                 }
             } catch (e) { console.error("Error de sincronización", e); }
-            syncIndicator.style.display = 'none';
         }
-        setInterval(syncData, 15000);
+        // Reducido a 5 segundos para que fluya casi inmediatamente
+        setInterval(syncData, 5000);
 
         function refreshCurrentView() {
             if (!adminView.classList.contains('hidden')) renderAdminView();
@@ -611,7 +619,7 @@
             rifa.countdownActive = true;
             rifa.countdownEndTime = Date.now() + (hours * 3600000);
             saveDataToGitHub(); renderAdminView();
-            alert(`Conteo iniciado. La rifa se cerrará en ${hours} horas.`);
+            showToast(`Conteo iniciado. La rifa se cerrará en ${hours} horas.`);
         };
 
         // --- SORTEO ---
@@ -629,7 +637,7 @@
             if (rifa.participantes.some(p => p.telefono === currentUser.telefono) || rifa.solicitudes.some(p => p.telefono === currentUser.telefono)) return alert("Ya has enviado una solicitud o estás participando.");
             
             rifa.solicitudes.push({ nombre: currentUser.nombre, telefono: currentUser.telefono, foto: currentUser.foto });
-            saveDataToGitHub(); alert(`¡Solicitud enviada! Espera la aprobación del administrador.`); renderAll();
+            saveDataToGitHub(); showToast(`¡Solicitud enviada! Espera la aprobación.`); renderAll();
         };
 
         // --- RENDERIZADO ---
