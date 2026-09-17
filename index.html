@@ -32,24 +32,26 @@
         </div>
         <div class="glass p-8 rounded-3xl shadow-2xl">
             <div class="flex flex-col gap-5">
-                <input type="password" id="passwordInput" class="glow-input w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all text-center tracking-widest" placeholder="Ingresa tu clave">
+                <input type="tel" id="phoneInput" class="glow-input w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all text-center" placeholder="Teléfono (Clientes)">
+                <input type="password" id="passwordInput" class="glow-input w-full p-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all text-center tracking-widest" placeholder="Clave de acceso">
                 <button id="enterBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-purple-500/30">DESBLOQUEAR</button>
+                <p class="text-xs text-gray-500">Admin: Deja el teléfono vacío y pon tu clave.</p>
             </div>
-            <p id="errorMsg" class="text-red-400 text-sm mt-4 hidden">⚠️ Clave incorrecta. Intenta de nuevo.</p>
+            <p id="errorMsg" class="text-red-400 text-sm mt-4 hidden">⚠️ Datos incorrectos. Intenta de nuevo.</p>
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div id="mainContent" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
+    <!-- VISTA ADMIN -->
+    <div id="adminView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex flex-col sm:flex-row justify-between items-center mb-8 pb-6 border-b border-white/10 gap-4">
-            <h1 class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">RIFAS MASTER</h1>
+            <h1 class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">PANEL ADMINISTRADOR</h1>
             <div class="flex gap-3">
-                <button id="settingsBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⚙️ <span class="hidden sm:inline">Configuración</span></button>
-                <button id="logoutBtn" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Cerrar Sesión</button>
+                <button id="adminUsersBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">👥 Clientes</button>
+                <button id="settingsBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⚙️ <span class="hidden sm:inline">Config</span></button>
+                <button id="logoutBtn" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Salir</button>
             </div>
         </header>
 
-        <!-- DASHBOARD STATS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             <div class="glass p-6 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Ganancias Totales</p><p id="statRevenue" class="text-3xl font-bold text-green-500">$0.00</p></div><span class="text-4xl">💰</span></div>
             <div class="glass p-6 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Boletos Vendidos</p><p id="statTickets" class="text-3xl font-bold text-cyan-400">0</p></div><span class="text-4xl">🎟️</span></div>
@@ -64,7 +66,6 @@
             </button>
         </div>
 
-        <!-- FORMULARIO -->
         <div id="formContainer" class="hidden glass p-6 md:p-8 rounded-3xl mb-10">
             <div class="flex justify-between items-center mb-6"><h3 id="formTitle" class="text-xl font-bold text-cyan-400">Crear Nueva Rifa</h3><button id="cancelFormBtn" class="text-gray-400 hover:text-white text-sm">Cerrar ✕</button></div>
             <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -95,28 +96,53 @@
             </form>
         </div>
 
-        <!-- GRID DE RIFAS -->
         <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-        <div id="emptyMessage" class="text-center py-12 text-gray-500 hidden"><p class="text-xl">Cargando rifas o sin rifas creadas...</p></div>
     </div>
 
-    <!-- MODAL CLIENTES -->
+    <!-- VISTA CLIENTE -->
+    <div id="clientView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
+            <div>
+                <h1 class="text-3xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">RIFAS MASTER</h1>
+                <p class="text-gray-300 text-sm">Bienvenido, <span id="clientName" class="font-bold"></span></p>
+            </div>
+            <button id="logoutBtn2" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Salir</button>
+        </header>
+        
+        <h2 class="text-2xl font-bold text-gray-300 mb-6">Rifas Disponibles para Ti</h2>
+        <div id="clientGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- MODAL GESTIONAR USUARIOS (ADMIN) -->
+    <div id="usersModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
+            <button id="closeUsersModal" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-cyan-400">Gestionar Clientes</h2>
+            
+            <div class="mb-6 pb-6 border-b border-white/10">
+                <h3 class="text-lg font-bold mb-4">Agregar Nuevo Cliente</h3>
+                <div class="flex flex-col gap-3">
+                    <input type="text" id="newUserName" placeholder="Nombre del cliente" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
+                    <input type="tel" id="newUserPhone" placeholder="Teléfono (será su usuario)" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
+                    <input type="text" id="newUserPass" placeholder="Contraseña temporal" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
+                    <div class="flex gap-3">
+                        <input type="file" id="newUserPhoto" accept="image/*" class="hidden">
+                        <button type="button" id="newUserPhotoBtn" class="w-full bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-6 rounded-xl transition">📸 Subir Foto</button>
+                        <button type="button" id="createUserBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition">Crear</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold mb-4">Lista de Clientes</h3>
+            <div id="usersList" class="flex flex-col gap-2"></div>
+        </div>
+    </div>
+
+    <!-- MODAL PARTICIPANTES -->
     <div id="participantModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
             <button id="closePartModalBtn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
             <h2 id="partModalTitle" class="text-2xl font-bold mb-6 text-cyan-400">Participantes</h2>
-            <div id="addPartForm" class="hidden mb-6 pb-6 border-b border-white/10">
-                <h3 class="text-lg font-bold mb-4">Agregar Cliente</h3>
-                <div class="flex flex-col gap-3">
-                    <input type="text" id="partName" placeholder="Nombre del cliente" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                    <input type="tel" id="partPhone" placeholder="Teléfono (WhatsApp)" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                    <div class="flex gap-3">
-                        <input type="file" id="partPhoto" accept="image/*" class="hidden">
-                        <button type="button" id="partPhotoBtn" class="w-full bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-6 rounded-xl transition">📸 Subir Foto</button>
-                        <button type="button" id="savePartBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition">Guardar</button>
-                    </div>
-                </div>
-            </div>
             <div id="participantsList" class="flex flex-col gap-2"></div>
         </div>
     </div>
@@ -133,7 +159,7 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIGURACIÓN (Solo Carrusel) -->
+    <!-- MODAL CONFIGURACIÓN -->
     <div id="settingsModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-md relative">
             <button id="closeSettingsBtn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
@@ -151,65 +177,115 @@
     <div id="saveIndicator" class="text-sm font-bold text-cyan-400">💾 Guardando en GitHub...</div>
 
     <script>
-        // --- CONFIGURACIÓN INICIAL Y SEGURIDAD ---
+        // --- CONFIGURACIÓN Y SEGURIDAD ---
         const SECRET_KEY = "y28c1992Y@";
         let settings = JSON.parse(localStorage.getItem('rifasSettings')) || { transitionTime: 3000 };
-        let rifas = [];
+        let db = { rifas: [], usuarios: [] }; // Base de datos local en memoria
+        let currentUser = null;
         let currentSha = null;
         let isSaving = false;
 
         // --- DATOS DE GITHUB (Token Disfrazado) ---
         const GH_USER = "RinconCity";
         const GH_REPO = "rifas-datos";
-        // Token dividido en 4 variables para evitar detección automática de GitHub Secret Scanning
         const _tk1 = "ghp_lrpUZn";
         const _tk2 = "7t8e34yKMp";
         const _tk3 = "OoRoFPdJUr";
         const _tk4 = "WCDx4ZbCGz";
         const GH_TOKEN = _tk1 + _tk2 + _tk3 + _tk4;
 
-        // --- LOGIN ---
-        const loginScreen = document.getElementById('loginScreen'), mainContent = document.getElementById('mainContent'), passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg'), logoutBtn = document.getElementById('logoutBtn');
-        function checkPassword() { 
-            if (passwordInput.value === SECRET_KEY) { 
-                loginScreen.classList.add('hidden'); 
-                mainContent.classList.remove('hidden'); 
-                passwordInput.value = ''; 
-                errorMsg.classList.add('hidden'); 
-                loadDataFromGitHub(); // Carga automática
-            } else { 
-                errorMsg.classList.remove('hidden'); 
-                loginScreen.classList.add('shake'); 
-                setTimeout(() => loginScreen.classList.remove('shake'), 500); 
-            } 
-        }
-        enterBtn.addEventListener('click', checkPassword); 
-        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') checkPassword(); });
-        logoutBtn.addEventListener('click', () => { mainContent.classList.add('hidden'); loginScreen.classList.remove('hidden'); });
+        // --- ELEMENTOS UI ---
+        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView');
+        const phoneInput = document.getElementById('phoneInput'), passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
+        const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
 
-        // --- CONFIGURACIÓN UI ---
-        const settingsBtn = document.getElementById('settingsBtn'), settingsModal = document.getElementById('settingsModal'), transitionSelect = document.getElementById('transitionSelect');
-        settingsBtn.addEventListener('click', () => { transitionSelect.value = settings.transitionTime; settingsModal.classList.remove('hidden'); });
-        document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.add('hidden'));
-        document.getElementById('saveSettingsBtn').addEventListener('click', () => { settings.transitionTime = parseInt(transitionSelect.value); localStorage.setItem('rifasSettings', JSON.stringify(settings)); settingsModal.classList.add('hidden'); startCarousel(); });
+        // --- LOGIN ---
+        function attemptLogin() {
+            const phone = phoneInput.value.trim();
+            const pass = passwordInput.value.trim();
+            errorMsg.classList.add('hidden');
+
+            if (pass === SECRET_KEY && (phone === "" || phone.toLowerCase() === "admin")) {
+                currentUser = { role: 'admin' };
+                loginScreen.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                loadDataFromGitHub();
+            } else {
+                const user = db.usuarios.find(u => u.telefono === phone && u.password === pass);
+                if (user) {
+                    currentUser = { role: 'user', ...user };
+                    loginScreen.classList.add('hidden');
+                    clientView.classList.remove('hidden');
+                    document.getElementById('clientName').innerText = currentUser.nombre;
+                    loadDataFromGitHub(); // Carga las rifas para que el cliente las vea
+                } else {
+                    errorMsg.classList.remove('hidden');
+                    loginScreen.classList.add('shake');
+                    setTimeout(() => loginScreen.classList.remove('shake'), 500);
+                }
+            }
+            passwordInput.value = '';
+        }
+        enterBtn.addEventListener('click', attemptLogin);
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
+        
+        function logout() {
+            currentUser = null;
+            adminView.classList.add('hidden');
+            clientView.classList.add('hidden');
+            loginScreen.classList.remove('hidden');
+            phoneInput.value = '';
+        }
+        logoutBtn.addEventListener('click', logout);
+        logoutBtn2.addEventListener('click', logout);
+
+        // --- GESTIONAR USUARIOS (ADMIN) ---
+        const usersModal = document.getElementById('usersModal'), usersList = document.getElementById('usersList');
+        let tempUserPhoto = null;
+        document.getElementById('adminUsersBtn').addEventListener('click', () => { renderUsers(); usersModal.classList.remove('hidden'); });
+        document.getElementById('closeUsersModal').addEventListener('click', () => usersModal.classList.add('hidden'));
+        document.getElementById('newUserPhotoBtn').addEventListener('click', () => document.getElementById('newUserPhoto').click());
+        document.getElementById('newUserPhoto').addEventListener('change', async (e) => { if (e.target.files[0]) { tempUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); document.getElementById('newUserPhotoBtn').innerText = "✅ Foto Cargada"; } });
+        document.getElementById('createUserBtn').addEventListener('click', () => {
+            const nombre = document.getElementById('newUserName').value, telefono = document.getElementById('newUserPhone').value, password = document.getElementById('newUserPass').value;
+            if (!nombre || !telefono || !password) return alert("Completa todos los datos.");
+            if (db.usuarios.some(u => u.telefono === telefono)) return alert("Ya existe un cliente con este teléfono.");
+            
+            db.usuarios.push({ id: Date.now().toString(), nombre, telefono, password, foto: tempUserPhoto });
+            saveDataToGitHub();
+            document.getElementById('newUserName').value = ''; document.getElementById('newUserPhone').value = ''; document.getElementById('newUserPass').value = ''; tempUserPhoto = null;
+            document.getElementById('newUserPhotoBtn').innerText = "📸 Subir Foto";
+            renderUsers();
+        });
+        
+        function renderUsers() {
+            usersList.innerHTML = db.usuarios.length === 0 ? '<p class="text-gray-500">Sin clientes registrados.</p>' : db.usuarios.map(u => `
+                <div class="flex items-center gap-3 bg-white/5 p-2 rounded-lg">
+                    <img src="${u.foto || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover">
+                    <div class="flex-grow"><p class="font-bold">${u.nombre}</p><p class="text-xs text-gray-400">Tel: ${u.telefono} | Pass: ${u.password}</p></div>
+                    <button onclick="deleteUser('${u.id}')" class="text-red-400 text-xs hover:text-red-500">Eliminar</button>
+                </div>
+            `).join('');
+        }
+        window.deleteUser = (id) => { if (confirm("¿Eliminar cliente?")) { db.usuarios = db.usuarios.filter(u => u.id !== id); saveDataToGitHub(); renderUsers(); } };
 
         // --- FUNCIONES BASE64 UTF-8 ---
         function encodeBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]); return btoa(binary); }
         function decodeBase64(b64) { const binary = atob(b64); const bytes = new Uint8Array(binary.length); for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
 
         // --- API GITHUB ---
-        const FILE_PATH = "data/rifas.json";
+        const FILE_PATH = "data/db.json";
         const saveIndicator = document.getElementById('saveIndicator');
 
         async function loadDataFromGitHub() {
             try {
                 const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
-                if (res.status === 404) { rifas = []; currentSha = null; renderAll(); startCarousel(); return; }
+                if (res.status === 404) { db = { rifas: [], usuarios: [] }; currentSha = null; renderAll(); startCarousel(); return; }
                 if (!res.ok) throw new Error("Error al cargar");
                 const data = await res.json();
                 currentSha = data.sha;
                 const content = decodeBase64(data.content);
-                rifas = JSON.parse(content) || [];
+                db = JSON.parse(content) || { rifas: [], usuarios: [] };
                 renderAll();
                 startCarousel();
             } catch (e) { alert("Error al cargar de GitHub."); }
@@ -220,8 +296,8 @@
             isSaving = true;
             saveIndicator.style.display = 'block';
             try {
-                const content = JSON.stringify(rifas, null, 2);
-                const body = { message: "Update Rifas Master", content: encodeBase64(content) };
+                const content = JSON.stringify(db, null, 2);
+                const body = { message: "Update DB", content: encodeBase64(content) };
                 if (currentSha) body.sha = currentSha;
                 const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, {
                     method: 'PUT',
@@ -236,12 +312,15 @@
             saveIndicator.style.display = 'none';
         }
 
-        // --- FORMULARIO RIFAS ---
+        function compressImage(file, mw, cb) { const r = new FileReader(); r.onload = (e) => { const img = new Image(); img.onload = () => { let w = img.width, h = img.height; if (w > mw) { h = (h * mw) / w; w = mw; } const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); cb(c.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
+
+        // --- FORMULARIO RIFAS (ADMIN) ---
         const toggleFormBtn = document.getElementById('toggleFormBtn'), formContainer = document.getElementById('formContainer'), productForm = document.getElementById('productForm'), deleteRifaBtn = document.getElementById('deleteRifaBtn');
+        let tempImages = [], editingId = null;
         toggleFormBtn.addEventListener('click', () => { resetForm(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
         document.getElementById('cancelFormBtn').addEventListener('click', () => { formContainer.classList.add('hidden'); resetForm(); });
         document.getElementById('cancelEditBtn').addEventListener('click', () => { formContainer.classList.add('hidden'); resetForm(); });
-        deleteRifaBtn.addEventListener('click', () => { if (!editingId) return; if (confirm("¿Eliminar esta rifa?")) { rifas = rifas.filter(r => r.id !== editingId); saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm(); } });
+        deleteRifaBtn.addEventListener('click', () => { if (!editingId) return; if (confirm("¿Eliminar esta rifa?")) { db.rifas = db.rifas.filter(r => r.id !== editingId); saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm(); } });
 
         const addImageBtn = document.getElementById('addImageBtn'), imageOptionsMenu = document.getElementById('imageOptionsMenu');
         addImageBtn.addEventListener('click', (e) => { e.stopPropagation(); imageOptionsMenu.classList.toggle('hidden'); });
@@ -256,56 +335,60 @@
         function renderImagePreviews() { const c = document.getElementById('imagePreviewContainer'); c.innerHTML = ''; tempImages.forEach((src, idx) => { const w = document.createElement('div'); w.className = 'relative'; w.innerHTML = `<img src="${src}" class="w-20 h-20 object-cover rounded-lg border border-white/10"><button type="button" onclick="removeTempImage(${idx})" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">✕</button>`; c.appendChild(w); }); }
         window.removeTempImage = (i) => { tempImages.splice(i, 1); renderImagePreviews(); };
         function resetForm() { editingId = null; tempImages = []; productForm.reset(); renderImagePreviews(); document.getElementById('formTitle').innerText = "Crear Nueva Rifa"; document.getElementById('createBtn').innerText = "Guardar Rifa"; document.getElementById('cancelEditBtn').classList.add('hidden'); deleteRifaBtn.classList.add('hidden'); }
-        function compressImage(file, mw, cb) { const r = new FileReader(); r.onload = (e) => { const img = new Image(); img.onload = () => { let w = img.width, h = img.height; if (w > mw) { h = (h * mw) / w; w = mw; } const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); cb(c.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
 
         productForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('productName').value, price = parseFloat(document.getElementById('productPrice').value), cupo = parseInt(document.getElementById('productCupo').value), endDate = new Date(document.getElementById('productEndDate').value).getTime();
             if (tempImages.length === 0) return alert("Agrega 1 foto.");
-            if (editingId) { const idx = rifas.findIndex(r => r.id === editingId); if (idx !== -1) { rifas[idx] = { ...rifas[idx], name, price, cupo, endDate, images: tempImages }; } } else { rifas.push({ id: Date.now().toString(), name, price, cupo, endDate, images: tempImages, participantes: [], winner: null }); }
+            if (editingId) { const idx = db.rifas.findIndex(r => r.id === editingId); if (idx !== -1) { db.rifas[idx] = { ...db.rifas[idx], name, price, cupo, endDate, images: tempImages }; } } else { db.rifas.push({ id: Date.now().toString(), name, price, cupo, endDate, images: tempImages, participantes: [], winner: null }); }
             saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm();
         });
 
-        window.editRifa = (id) => { const r = rifas.find(r => r.id === id); if (!r) return; editingId = id; tempImages = [...r.images]; document.getElementById('formTitle').innerText = "Editando Rifa"; document.getElementById('createBtn').innerText = "Actualizar"; document.getElementById('cancelEditBtn').classList.remove('hidden'); deleteRifaBtn.classList.remove('hidden'); document.getElementById('productName').value = r.name; document.getElementById('productPrice').value = r.price; document.getElementById('productCupo').value = r.cupo; if(r.endDate) document.getElementById('productEndDate').value = new Date(r.endDate - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16); renderImagePreviews(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+        window.editRifa = (id) => { const r = db.rifas.find(r => r.id === id); if (!r) return; editingId = id; tempImages = [...r.images]; document.getElementById('formTitle').innerText = "Editando Rifa"; document.getElementById('createBtn').innerText = "Actualizar"; document.getElementById('cancelEditBtn').classList.remove('hidden'); deleteRifaBtn.classList.remove('hidden'); document.getElementById('productName').value = r.name; document.getElementById('productPrice').value = r.price; document.getElementById('productCupo').value = r.cupo; if(r.endDate) document.getElementById('productEndDate').value = new Date(r.endDate - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16); renderImagePreviews(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
-        // --- PARTICIPANTES ---
-        const participantModal = document.getElementById('participantModal'), participantsList = document.getElementById('participantsList'), addPartForm = document.getElementById('addPartForm');
-        let currentPartRifaId = null;
+        // --- PARTICIPANTES Y SORTEO (ADMIN) ---
+        const participantModal = document.getElementById('participantModal'), participantsList = document.getElementById('participantsList');
         document.getElementById('closePartModalBtn').addEventListener('click', () => participantModal.classList.add('hidden'));
-        window.openParticipants = (id, isAdding) => { currentPartRifaId = id; const rifa = rifas.find(r => r.id === id); if (!rifa) return; document.getElementById('partModalTitle').innerText = `Participantes - ${rifa.name}`; addPartForm.classList.toggle('hidden', !isAdding); participantsList.innerHTML = !rifa.participantes || rifa.participantes.length === 0 ? '<p class="text-gray-500">Sin participantes.</p>' : rifa.participantes.map(p => `<div class="flex items-center gap-3 bg-white/5 p-2 rounded-lg"><img src="${p.foto || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover"><div><p class="font-bold">${p.nombre}</p><p class="text-xs text-gray-400">Tel: ${p.telefono} | Boleto: #${p.numero}</p></div></div>`).join(''); participantModal.classList.remove('hidden'); };
+        window.openParticipants = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; document.getElementById('partModalTitle').innerText = `Participantes - ${rifa.name}`; participantsList.innerHTML = !rifa.participantes || rifa.participantes.length === 0 ? '<p class="text-gray-500">Sin participantes.</p>' : rifa.participantes.map(p => `<div class="flex items-center gap-3 bg-white/5 p-2 rounded-lg"><img src="${p.foto || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover"><div><p class="font-bold">${p.nombre}</p><p class="text-xs text-gray-400">Tel: ${p.telefono} | Boleto: #${p.numero}</p></div></div>`).join(''); participantModal.classList.remove('hidden'); };
 
-        document.getElementById('partPhotoBtn').addEventListener('click', () => document.getElementById('partPhoto').click());
-        document.getElementById('partPhoto').addEventListener('change', async (e) => { if (e.target.files[0]) { tempPartPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); document.getElementById('partPhotoBtn').innerText = "✅ Foto Cargada"; } });
-        document.getElementById('savePartBtn').addEventListener('click', () => {
-            const name = document.getElementById('partName').value, phone = document.getElementById('partPhone').value;
-            if (!name || !phone) return alert("Nombre y teléfono obligatorios.");
-            const rifa = rifas.find(r => r.id === currentPartRifaId); if (!rifa) return;
-            if (rifa.participantes && rifa.participantes.length >= rifa.cupo) return alert("Cupo lleno.");
-            const num = Math.floor(Math.random() * 9999) + 1;
-            rifa.participantes.push({ nombre: name, telefono: phone, foto: tempPartPhoto, numero: num });
-            saveDataToGitHub();
-            document.getElementById('partName').value = ''; document.getElementById('partPhone').value = ''; tempPartPhoto = null; document.getElementById('partPhotoBtn').innerText = "📸 Subir Foto"; openParticipants(currentPartRifaId, true);
-        });
-
-        // --- SORTEO ---
         const raffleModal = document.getElementById('raffleModal'), slotMachineText = document.getElementById('slotMachineText'), winnerDisplay = document.getElementById('winnerDisplay');
-        window.drawWinner = (id) => { const rifa = rifas.find(r => r.id === id); if (!rifa || !rifa.participantes || rifa.participantes.length === 0) return alert("No hay participantes."); raffleModal.classList.remove('hidden'); winnerDisplay.classList.add('hidden'); slotMachineText.classList.remove('hidden'); let count = 0; const interval = setInterval(() => { slotMachineText.innerText = Math.floor(Math.random() * 9999) + 1; count++; if (count > 20) { clearInterval(interval); selectWinner(id); } }, 100); };
-        function selectWinner(id) { const rifa = rifas.find(r => r.id === id); const winner = rifa.participantes[Math.floor(Math.random() * rifa.participantes.length)]; rifa.winner = winner; saveDataToGitHub(); slotMachineText.classList.add('hidden'); document.getElementById('winnerPhoto').src = winner.foto || 'https://via.placeholder.com/100'; document.getElementById('winnerName').innerText = winner.nombre; document.getElementById('winnerTicket').innerText = `Boleto #${winner.numero}`; winnerDisplay.classList.remove('hidden'); setTimeout(() => { raffleModal.classList.add('hidden'); }, 5000); }
+        window.drawWinner = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa || !rifa.participantes || rifa.participantes.length === 0) return alert("No hay participantes."); raffleModal.classList.remove('hidden'); winnerDisplay.classList.add('hidden'); slotMachineText.classList.remove('hidden'); let count = 0; const interval = setInterval(() => { slotMachineText.innerText = Math.floor(Math.random() * 9999) + 1; count++; if (count > 20) { clearInterval(interval); selectWinner(id); } }, 100); };
+        function selectWinner(id) { const rifa = db.rifas.find(r => r.id === id); const winner = rifa.participantes[Math.floor(Math.random() * rifa.participantes.length)]; rifa.winner = winner; saveDataToGitHub(); slotMachineText.classList.add('hidden'); document.getElementById('winnerPhoto').src = winner.foto || 'https://via.placeholder.com/100'; document.getElementById('winnerName').innerText = winner.nombre; document.getElementById('winnerTicket').innerText = `Boleto #${winner.numero}`; winnerDisplay.classList.remove('hidden'); setTimeout(() => { raffleModal.classList.add('hidden'); }, 5000); }
 
-        // --- EXPORT EXCEL ---
-        window.exportExcel = (id) => { const rifa = rifas.find(r => r.id === id); if (!rifa) return; const ws = XLSX.utils.json_to_sheet(rifa.participantes.map(p => ({ Nombre: p.nombre, Teléfono: p.telefono, Boleto: p.numero }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Participantes"); XLSX.writeFile(wb, `${rifa.name}_participantes.xlsx`); };
+        // --- EXPORT EXCEL (ADMIN) ---
+        window.exportExcel = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; const ws = XLSX.utils.json_to_sheet(rifa.participantes.map(p => ({ Nombre: p.nombre, Teléfono: p.telefono, Boleto: p.numero }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Participantes"); XLSX.writeFile(wb, `${rifa.name}_participantes.xlsx`); };
+
+        // --- PARTICIPAR (CLIENTE) ---
+        window.joinRifa = function(id) {
+            const rifa = db.rifas.find(r => r.id === id);
+            if (!rifa) return;
+            if (rifa.participantes && rifa.participantes.length >= rifa.cupo) return alert("Cupo lleno.");
+            if (rifa.participantes.some(p => p.telefono === currentUser.telefono)) return alert("Ya estás participando en esta rifa.");
+
+            const num = Math.floor(Math.random() * 9999) + 1;
+            rifa.participantes.push({ nombre: currentUser.nombre, telefono: currentUser.telefono, foto: currentUser.foto, numero: num });
+            saveDataToGitHub();
+            alert(`¡Inscrito correctamente! Tu número de boleto es el #${num}`);
+            renderAll();
+        };
 
         // --- RENDER PRINCIPAL ---
         function renderAll() {
-            document.getElementById('statRifas').innerText = rifas.length;
-            document.getElementById('statTickets').innerText = rifas.reduce((a, b) => a + (b.participantes ? b.participantes.length : 0), 0);
-            document.getElementById('statRevenue').innerText = `$${rifas.reduce((a, b) => a + ((b.participantes ? b.participantes.length : 0) * b.price), 0).toFixed(2)}`;
+            if (currentUser && currentUser.role === 'admin') renderAdminView();
+            if (currentUser && currentUser.role === 'user') renderClientView();
+            updateCountdowns();
+        }
+
+        function renderAdminView() {
+            document.getElementById('statRifas').innerText = db.rifas.length;
+            document.getElementById('statTickets').innerText = db.rifas.reduce((a, b) => a + (b.participantes ? b.participantes.length : 0), 0);
+            document.getElementById('statRevenue').innerText = `$${db.rifas.reduce((a, b) => a + ((b.participantes ? b.participantes.length : 0) * b.price), 0).toFixed(2)}`;
             const grid = document.getElementById('gridContainer'); grid.innerHTML = '';
-            if (rifas.length === 0) { document.getElementById('emptyMessage').classList.remove('hidden'); return; } document.getElementById('emptyMessage').classList.add('hidden');
-            rifas.forEach(rifa => {
+            if (db.rifas.length === 0) { grid.innerHTML = '<p class="text-center py-12 text-gray-500 text-xl">No hay rifas creadas.</p>'; return; }
+            db.rifas.forEach(rifa => {
                 const vendidos = rifa.participantes ? rifa.participantes.length : 0, lleno = vendidos >= rifa.cupo;
                 const progress = (vendidos / rifa.cupo) * 100;
-                let btns = `<div class="flex gap-2 mt-3"><button onclick="openParticipants('${rifa.id}', true)" class="flex-1 bg-cyan-500/80 hover:bg-cyan-500 text-white text-sm font-bold py-2 rounded-lg">➕ Agregar Cliente</button><button onclick="openParticipants('${rifa.id}', false)" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-2 rounded-lg">👀 Ver</button></div>`;
+                let btns = `<div class="flex gap-2 mt-3"><button onclick="openParticipants('${rifa.id}')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-2 rounded-lg">👀 Ver Clientes</button></div>`;
                 if (lleno && !rifa.winner) btns = `<button onclick="drawWinner('${rifa.id}')" class="w-full mt-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl animate-pulse">🎉 SORTear GANADOR</button>`;
                 if (rifa.winner) btns = `<div class="mt-3 text-center text-yellow-400 font-bold p-2 bg-yellow-500/10 rounded-lg">🏆 Ganador: ${rifa.winner.nombre} (#${rifa.winner.numero})</div>`;
                 const card = document.createElement('div'); card.className = 'glass rounded-2xl overflow-hidden flex flex-col';
@@ -322,20 +405,54 @@
                         ${!rifa.winner ? `<div class="w-full bg-gray-700 rounded-full h-2.5 mb-4"><div class="bg-cyan-500 h-2.5 rounded-full" style="width: ${progress}%"></div></div>` : ''}
                         ${btns}
                         <div class="flex gap-2 mt-2">
-                            <button onclick="exportExcel('${rifa.id}')" class="w-full bg-green-600/80 hover:bg-green-500 text-white text-xs font-bold py-2 rounded-lg">📊 Exportar Excel</button>
+                            <button onclick="exportExcel('${rifa.id}')" class="w-full bg-green-600/80 hover:bg-green-500 text-white text-xs font-bold py-2 rounded-lg">📊 Excel</button>
                             <a href="https://wa.me/?text=¡Participa en la rifa de ${rifa.name} por solo $${rifa.price}!" target="_blank" class="w-full bg-green-500/80 hover:bg-green-500 text-white text-xs font-bold py-2 rounded-lg text-center">📤 Compartir</a>
                         </div>
                     </div>`;
                 grid.appendChild(card);
             });
-            updateCountdowns();
+        }
+
+        function renderClientView() {
+            const grid = document.getElementById('clientGridContainer'); grid.innerHTML = '';
+            if (db.rifas.length === 0) { grid.innerHTML = '<p class="text-center py-12 text-gray-500 text-xl">Aún no hay rifas disponibles. Vuelve pronto.</p>'; return; }
+            db.rifas.forEach(rifa => {
+                const vendidos = rifa.participantes ? rifa.participantes.length : 0, lleno = vendidos >= rifa.cupo;
+                const yaParticipa = rifa.participantes && rifa.participantes.some(p => p.telefono === currentUser.telefono);
+                
+                let btnHtml = '';
+                if (rifa.winner) {
+                    btnHtml = `<div class="mt-3 text-center text-yellow-400 font-bold p-3 bg-yellow-500/10 rounded-lg">🏆 Ganó: ${rifa.winner.nombre} (#${rifa.winner.numero})</div>`;
+                } else if (yaParticipa) {
+                    const miBoleto = rifa.participantes.find(p => p.telefono === currentUser.telefono);
+                    btnHtml = `<button class="w-full mt-3 bg-green-600/80 text-white font-bold py-3 rounded-xl cursor-default">✅ Participando (#${miBoleto.numero})</button>`;
+                } else if (lleno) {
+                    btnHtml = `<button class="w-full mt-3 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold cursor-not-allowed">Cupo Lleno</button>`;
+                } else {
+                    btnHtml = `<button onclick="joinRifa('${rifa.id}')" class="w-full mt-3 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition transform hover:scale-105 shadow-lg shadow-purple-500/20">Participar ($${rifa.price})</button>`;
+                }
+
+                const card = document.createElement('div'); card.className = 'glass rounded-2xl overflow-hidden flex flex-col';
+                card.innerHTML = `
+                    <div class="relative overflow-hidden h-64">
+                        <img src="${rifa.images[0]}" data-carousel="${rifa.id}" data-idx="0" class="carousel-img w-full h-full object-cover">
+                        ${rifa.winner ? '' : `<div class="absolute top-2 right-2 bg-black/60 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm">Cupo: ${vendidos}/${rifa.cupo}</div>`}
+                    </div>
+                    <div class="p-5 flex-grow flex flex-col">
+                        <h3 class="text-xl font-bold mb-2 text-white">${rifa.name}</h3>
+                        <p class="text-gray-300 mb-2">Monto: <span class="text-cyan-400 font-extrabold text-lg">$${rifa.price.toFixed(2)}</span></p>
+                        ${!rifa.winner ? `<div id="countdown-${rifa.id}" class="text-sm text-red-400 font-bold mb-3"></div>` : ''}
+                        ${btnHtml}
+                    </div>`;
+                grid.appendChild(card);
+            });
         }
 
         // --- CARRUSEL Y COUNTDOWN ---
         let carouselTimeout;
         function startCarousel() { clearTimeout(carouselTimeout); if (settings.transitionTime === 0) return; carouselTimeout = setTimeout(() => { advanceCarousels(); startCarousel(); }, settings.transitionTime); }
-        function advanceCarousels() { document.querySelectorAll('[data-carousel]').forEach(img => { const id = img.dataset.carousel; const rifa = rifas.find(r => r.id === id); if (!rifa || rifa.images.length <= 1) return; img.style.opacity = 0; setTimeout(() => { let i = parseInt(img.dataset.idx); i = (i + 1) % rifa.images.length; img.src = rifa.images[i]; img.dataset.idx = i; img.style.opacity = 1; }, 400); }); }
-        function updateCountdowns() { rifas.forEach(rifa => { if (rifa.winner) return; const el = document.getElementById(`countdown-${rifa.id}`); if (!el || !rifa.endDate) return; const diff = rifa.endDate - Date.now(); if (diff <= 0) { el.innerText = "¡Sorteo Inminente!"; return; } const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏳ Termina en: ${d}d ${h}h ${m}m ${s}s`; }); }
+        function advanceCarousels() { document.querySelectorAll('[data-carousel]').forEach(img => { const id = img.dataset.carousel; const rifa = db.rifas.find(r => r.id === id); if (!rifa || rifa.images.length <= 1) return; img.style.opacity = 0; setTimeout(() => { let i = parseInt(img.dataset.idx); i = (i + 1) % rifa.images.length; img.src = rifa.images[i]; img.dataset.idx = i; img.style.opacity = 1; }, 400); }); }
+        function updateCountdowns() { db.rifas.forEach(rifa => { if (rifa.winner) return; const el = document.getElementById(`countdown-${rifa.id}`); if (!el || !rifa.endDate) return; const diff = rifa.endDate - Date.now(); if (diff <= 0) { el.innerText = "¡Sorteo Inminente!"; return; } const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏳ Termina en: ${d}d ${h}h ${m}m ${s}s`; }); }
         setInterval(updateCountdowns, 1000);
     </script>
 </body>
