@@ -17,6 +17,9 @@
         .modal-overlay { background-color: rgba(0,0,0,0.8); }
         .slot-machine { font-family: monospace; font-size: 4rem; font-weight: bold; color: #22d3ee; text-shadow: 0 0 20px #22d3ee; }
         #saveIndicator { position: fixed; bottom: 20px; left: 20px; padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,0.7); display: none; z-index: 100; }
+        #syncIndicator { position: fixed; bottom: 20px; right: 20px; padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,0.7); display: none; z-index: 100; font-size: 0.75rem; color: #a78bfa; }
+        .bounce-notif { animation: bounceNotif 1s infinite; }
+        @keyframes bounceNotif { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     </style>
 </head>
 <body class="text-white">
@@ -97,13 +100,39 @@
         <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
+    <!-- VISTA DETALLES DE LA RIFA -->
+    <div id="rifaDetailsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Detalles de la Rifa</h1>
+            <button id="detailsBackBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Dashboard</button>
+        </header>
+        <div class="glass p-6 rounded-3xl mb-8 flex flex-col md:flex-row gap-6 items-center">
+            <img id="rifaDetailsImg" src="" class="w-full md:w-1/3 h-48 object-cover rounded-xl">
+            <div class="flex-grow">
+                <h2 id="rifaDetailsName" class="text-2xl font-bold text-white mb-2"></h2>
+                <p id="rifaDetailsPrice" class="text-cyan-400 font-bold text-xl mb-4"></p>
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <span id="rifaDetailsCupo" class="bg-white/10 px-3 py-1 rounded-full"></span>
+                    <span id="rifaDetailsCountdown" class="bg-yellow-500/20 px-3 py-1 rounded-full text-yellow-400 hidden"></span>
+                </div>
+            </div>
+        </div>
+        <div class="mb-10">
+            <h3 class="text-xl font-bold mb-4 text-yellow-400">Solicitudes Pendientes</h3>
+            <div id="pendingList" class="flex flex-col gap-3"></div>
+        </div>
+        <div>
+            <h3 class="text-xl font-bold mb-4 text-green-400">Participantes Confirmados</h3>
+            <div id="approvedList" class="flex flex-col gap-3"></div>
+        </div>
+    </div>
+
     <!-- VISTA GESTIÓN DE CLIENTES -->
     <div id="clientsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Gestión de Clientes</h1>
             <button id="clientsBackToDashBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Dashboard</button>
         </header>
-
         <div class="glass p-6 md:p-8 rounded-3xl mb-10">
             <h3 class="text-xl font-bold mb-6 text-cyan-400">Agregar Nuevo Cliente</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,7 +147,6 @@
             </div>
             <button type="button" id="createUserBtn" class="w-full mt-6 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-4 px-6 rounded-xl transition">Crear Cliente y Generar ID</button>
         </div>
-
         <h3 class="text-xl font-bold mb-4 text-gray-300">Clientes Registrados (Toca para editar)</h3>
         <div id="usersList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </div>
@@ -132,33 +160,19 @@
                 <button id="editUserDashboardBtn" class="text-sm bg-cyan-500/20 hover:bg-cyan-500/40 px-4 py-2 rounded-full transition border border-cyan-500/20 font-medium flex items-center gap-2">🏠 Dashboard</button>
             </div>
         </header>
-        
         <div class="glass p-6 md:p-8 rounded-3xl flex flex-col gap-6">
-            <div class="flex justify-center">
-                <img id="editUserPhotoPreview" src="https://via.placeholder.com/120" class="w-28 h-28 rounded-full object-cover border-4 border-cyan-500">
-            </div>
-            
-            <div class="flex flex-col gap-2">
-                <label class="text-sm text-gray-400">ID del Cliente (Su Contraseña)</label>
-                <input type="text" id="editUserIdDisplay" readonly class="w-full p-3 bg-gray-800/50 border border-white/10 rounded-xl text-cyan-400 font-mono text-center text-2xl font-bold tracking-widest">
-            </div>
-            
+            <div class="flex justify-center"><img id="editUserPhotoPreview" src="https://via.placeholder.com/120" class="w-28 h-28 rounded-full object-cover border-4 border-cyan-500"></div>
+            <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">ID del Cliente (Su Contraseña)</label><input type="text" id="editUserIdDisplay" readonly class="w-full p-3 bg-gray-800/50 border border-white/10 rounded-xl text-cyan-400 font-mono text-center text-2xl font-bold tracking-widest"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Nombre</label><input type="text" id="editUserName" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></div>
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Teléfono (WhatsApp)</label><input type="tel" id="editUserPhone" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></div>
             </div>
-            
             <div class="flex gap-3">
-                <input type="file" id="editUserPhotoPc" accept="image/*" class="hidden">
-                <input type="file" id="editUserPhotoCam" accept="image/*" capture="environment" class="hidden">
+                <input type="file" id="editUserPhotoPc" accept="image/*" class="hidden"><input type="file" id="editUserPhotoCam" accept="image/*" capture="environment" class="hidden">
                 <button type="button" id="btnEditPhotoPc" class="flex-1 bg-white/5 border border-dashed border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">💻 Cambiar Foto</button>
                 <button type="button" id="btnEditPhotoCam" class="flex-1 bg-white/5 border border-dashed border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">📸 Cámara</button>
             </div>
-
-            <button type="button" id="sendWhatsAppIdBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 text-lg">
-                📤 Enviar ID por WhatsApp
-            </button>
-            
+            <button type="button" id="sendWhatsAppIdBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 text-lg">📤 Enviar ID por WhatsApp</button>
             <div class="flex gap-4 mt-4">
                 <button type="button" id="saveUserChangesBtn" class="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-4 px-8 rounded-xl transition">Guardar Cambios</button>
                 <button type="button" id="deleteUserBtn" class="bg-red-600/80 hover:bg-red-500 text-white font-bold py-4 px-8 rounded-xl transition">🗑️</button>
@@ -169,23 +183,11 @@
     <!-- VISTA CLIENTE -->
     <div id="clientView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
-            <div>
-                <h1 class="text-3xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">RIFAS MASTER</h1>
-                <p class="text-gray-300 text-sm">Bienvenido, <span id="clientName" class="font-bold"></span></p>
-            </div>
+            <div><h1 class="text-3xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">RIFAS MASTER</h1><p class="text-gray-300 text-sm">Bienvenido, <span id="clientName" class="font-bold"></span></p></div>
             <button id="logoutBtn2" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Salir</button>
         </header>
         <h2 class="text-2xl font-bold text-gray-300 mb-6">Rifas Disponibles para Ti</h2>
         <div id="clientGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-    <!-- MODAL PARTICIPANTES -->
-    <div id="participantModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
-        <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
-            <button id="closePartModalBtn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
-            <h2 id="partModalTitle" class="text-2xl font-bold mb-6 text-cyan-400">Participantes</h2>
-            <div id="participantsList" class="flex flex-col gap-2"></div>
-        </div>
     </div>
 
     <!-- MODAL SORTEO -->
@@ -216,6 +218,7 @@
     </div>
 
     <div id="saveIndicator" class="text-sm font-bold text-cyan-400">💾 Guardando en GitHub...</div>
+    <div id="syncIndicator" class="text-sm font-bold text-purple-400">🔄 Sincronizando...</div>
 
     <script>
         // --- CONFIGURACIÓN Y SEGURIDAD ---
@@ -225,6 +228,7 @@
         let currentUser = null;
         let currentSha = null;
         let isSaving = false;
+        let currentDetailsId = null; // Para refrescar detalles
 
         // --- DATOS DE GITHUB ---
         const GH_USER = "RinconCity";
@@ -233,9 +237,10 @@
         const GH_TOKEN = _tk1 + _tk2 + _tk3 + _tk4;
 
         // --- ELEMENTOS UI ---
-        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView'), clientsView = document.getElementById('clientsView');
+        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView'), clientsView = document.getElementById('clientsView'), rifaDetailsView = document.getElementById('rifaDetailsView');
         const passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
+        const syncIndicator = document.getElementById('syncIndicator');
 
         // --- LOGIN UNIFICADO ---
         async function attemptLogin() {
@@ -265,7 +270,7 @@
         }
         enterBtn.addEventListener('click', attemptLogin);
         passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
-        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); editUserView.classList.add('hidden'); clientsView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
+        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); editUserView.classList.add('hidden'); clientsView.classList.add('hidden'); rifaDetailsView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
         logoutBtn.addEventListener('click', logout);
         logoutBtn2.addEventListener('click', logout);
 
@@ -274,6 +279,7 @@
         document.getElementById('clientsBackToDashBtn').addEventListener('click', () => { clientsView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
         document.getElementById('editUserBackBtn').addEventListener('click', () => { editUserView.classList.add('hidden'); clientsView.classList.remove('hidden'); });
         document.getElementById('editUserDashboardBtn').addEventListener('click', () => { editUserView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
+        document.getElementById('detailsBackBtn').addEventListener('click', () => { currentDetailsId = null; rifaDetailsView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
 
         // --- GENERADOR ID 8 CARACTERES ---
         function generateId() {
@@ -302,7 +308,7 @@
             db.usuarios.push({ id: newId, nombre, telefono, foto: tempNewUserPhoto });
             saveDataToGitHub();
             document.getElementById('newUserName').value = ''; document.getElementById('newUserPhone').value = '+53'; tempNewUserPhoto = null;
-            renderUsers(); renderAdminView();
+            renderUsers(); renderAdminView(); // Renderizado inmediato
             alert(`Cliente creado. Su ID es: ${newId}`);
         });
 
@@ -355,11 +361,13 @@
             }
         });
 
+        // --- ENVIAR ID Y LINK POR WHATSAPP ---
         document.getElementById('sendWhatsAppIdBtn').addEventListener('click', () => {
             const id = document.getElementById('editUserIdDisplay').value;
             const name = document.getElementById('editUserName').value;
             const tel = document.getElementById('editUserPhone').value.replace(/[^0-9]/g, '');
-            const msg = `Hola ${name}! Este es tu ID para entrar en la pagina de rifas: ${id}`;
+            const pageLink = "https://rinconcity.github.io/rifas-web/";
+            const msg = `Hola ${name}! Este es tu ID para entrar en la pagina de rifas: ${id}\n\nEntra a este link y usa tu ID para ver las rifas disponibles:\n${pageLink}`;
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         });
 
@@ -378,6 +386,7 @@
                 currentSha = data.sha;
                 const content = decodeBase64(data.content);
                 db = JSON.parse(content) || { rifas: [], usuarios: [] };
+                db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; });
                 renderAll(); startCarousel();
             } catch (e) { alert("Error al cargar de GitHub."); }
         }
@@ -397,6 +406,35 @@
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
+        // --- SINCRONIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO ---
+        async function syncData() {
+            if (!currentSha || isSaving || !currentUser) return;
+            syncIndicator.style.display = 'block';
+            try {
+                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.sha !== currentSha) {
+                    // Los datos cambiaron en GitHub (ej: un cliente participó)
+                    const content = decodeBase64(data.content);
+                    db = JSON.parse(content) || { rifas: [], usuarios: [] };
+                    db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; });
+                    currentSha = data.sha;
+                    refreshCurrentView(); // Actualizar solo la vista activa sin saltos bruscos
+                }
+            } catch (e) { console.error("Error de sincronización", e); }
+            syncIndicator.style.display = 'none';
+        }
+        // Revisar GitHub cada 15 segundos
+        setInterval(syncData, 15000);
+
+        function refreshCurrentView() {
+            if (!adminView.classList.contains('hidden')) renderAdminView();
+            else if (!clientView.classList.contains('hidden')) renderClientView();
+            else if (!clientsView.classList.contains('hidden')) renderUsers();
+            else if (!rifaDetailsView.classList.contains('hidden') && currentDetailsId) openRifaDetails(currentDetailsId);
+        }
+
         function compressImage(file, mw, cb) { const r = new FileReader(); r.onload = (e) => { const img = new Image(); img.onload = () => { let w = img.width, h = img.height; if (w > mw) { h = (h * mw) / w; w = mw; } const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); cb(c.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
 
         // --- FORMULARIO RIFAS ---
@@ -405,7 +443,7 @@
         toggleFormBtn.addEventListener('click', () => { resetForm(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
         document.getElementById('cancelFormBtn').addEventListener('click', () => { formContainer.classList.add('hidden'); resetForm(); });
         document.getElementById('cancelEditBtn').addEventListener('click', () => { formContainer.classList.add('hidden'); resetForm(); });
-        deleteRifaBtn.addEventListener('click', () => { if (!editingId) return; if (confirm("¿Eliminar esta rifa?")) { db.rifas = db.rifas.filter(r => r.id !== editingId); saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm(); } });
+        deleteRifaBtn.addEventListener('click', () => { if (!editingId) return; if (confirm("¿Eliminar esta rifa?")) { db.rifas = db.rifas.filter(r => r.id !== editingId); saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm(); renderAdminView(); } });
 
         const addImageBtn = document.getElementById('addImageBtn'), imageOptionsMenu = document.getElementById('imageOptionsMenu');
         addImageBtn.addEventListener('click', (e) => { e.stopPropagation(); imageOptionsMenu.classList.toggle('hidden'); });
@@ -425,48 +463,102 @@
             e.preventDefault();
             const name = document.getElementById('productName').value, price = parseFloat(document.getElementById('productPrice').value), cupo = parseInt(document.getElementById('productCupo').value);
             if (tempImages.length === 0) return alert("Agrega 1 foto.");
-            if (editingId) { const idx = db.rifas.findIndex(r => r.id === editingId); if (idx !== -1) { db.rifas[idx] = { ...db.rifas[idx], name, price, cupo, images: tempImages }; } } else { db.rifas.push({ id: Date.now().toString(), name, price, cupo, images: tempImages, participantes: [], winner: null, countdownActive: false, countdownEndTime: null }); }
+            if (editingId) { const idx = db.rifas.findIndex(r => r.id === editingId); if (idx !== -1) { db.rifas[idx] = { ...db.rifas[idx], name, price, cupo, images: tempImages }; } } else { db.rifas.push({ id: Date.now().toString(), name, price, cupo, images: tempImages, solicitudes: [], participantes: [], winner: null, countdownActive: false, countdownEndTime: null }); }
             saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm();
+            renderAdminView(); // Renderizado inmediato en el dashboard
         });
 
         window.editRifa = (id) => { const r = db.rifas.find(r => r.id === id); if (!r) return; editingId = id; tempImages = [...r.images]; document.getElementById('formTitle').innerText = "Editando Rifa"; document.getElementById('createBtn').innerText = "Actualizar"; document.getElementById('cancelEditBtn').classList.remove('hidden'); deleteRifaBtn.classList.remove('hidden'); document.getElementById('productName').value = r.name; document.getElementById('productPrice').value = r.price; document.getElementById('productCupo').value = r.cupo; renderImagePreviews(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 
+        // --- DETALLES DE RIFA Y APROBACIONES ---
+        window.openRifaDetails = function(id) {
+            currentDetailsId = id;
+            const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
+            document.getElementById('rifaDetailsImg').src = rifa.images[0];
+            document.getElementById('rifaDetailsName').innerText = rifa.name;
+            document.getElementById('rifaDetailsPrice').innerText = `$${rifa.price.toFixed(2)}`;
+            document.getElementById('rifaDetailsCupo').innerText = `Cupo: ${rifa.participantes.length}/${rifa.cupo}`;
+            
+            const cdEl = document.getElementById('rifaDetailsCountdown');
+            if (rifa.countdownActive) { cdEl.classList.remove('hidden'); cdEl.id = `countdown-${rifa.id}-details`; } else { cdEl.classList.add('hidden'); }
+
+            const pendingList = document.getElementById('pendingList');
+            pendingList.innerHTML = (!rifa.solicitudes || rifa.solicitudes.length === 0) ? '<p class="text-gray-500">No hay solicitudes pendientes.</p>' : rifa.solicitudes.map(p => `
+                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-yellow-500/30">
+                    <img src="${p.foto}" class="w-12 h-12 rounded-full object-cover">
+                    <div class="flex-grow"><p class="font-bold">${p.nombre}</p><p class="text-xs text-gray-400">${p.telefono}</p></div>
+                    <button onclick="approveRequest('${rifa.id}', '${p.telefono}')" class="bg-green-600 hover:bg-green-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition">✅ Confirmar</button>
+                    <button onclick="rejectRequest('${rifa.id}', '${p.telefono}')" class="bg-red-600/80 hover:bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition">❌</button>
+                </div>
+            `).join('');
+
+            const approvedList = document.getElementById('approvedList');
+            approvedList.innerHTML = (!rifa.participantes || rifa.participantes.length === 0) ? '<p class="text-gray-500">No hay participantes confirmados.</p>' : rifa.participantes.map(p => `
+                <div class="flex items-center gap-3 bg-white/5 p-3 rounded-lg">
+                    <img src="${p.foto}" class="w-12 h-12 rounded-full object-cover">
+                    <div class="flex-grow"><p class="font-bold">${p.nombre}</p><p class="text-xs text-gray-400">${p.telefono}</p></div>
+                    <div class="bg-cyan-500/20 text-cyan-400 font-bold px-4 py-2 rounded-full text-sm">#${p.numero}</div>
+                </div>
+            `).join('');
+
+            adminView.classList.add('hidden');
+            rifaDetailsView.classList.remove('hidden');
+            window.scrollTo(0, 0);
+            updateCountdowns(); // Llamar para que actualice el de detalles si existe
+        };
+
+        window.approveRequest = function(rifaId, clientPhone) {
+            const rifa = db.rifas.find(r => r.id === rifaId); if (!rifa) return;
+            if (rifa.participantes.length >= rifa.cupo) return alert("Cupo lleno. No se puede aprobar.");
+            const reqIdx = rifa.solicitudes.findIndex(p => p.telefono === clientPhone);
+            if (reqIdx === -1) return;
+            const req = rifa.solicitudes[reqIdx];
+            req.numero = Math.floor(Math.random() * 9999) + 1;
+            rifa.participantes.push(req);
+            rifa.solicitudes.splice(reqIdx, 1);
+            saveDataToGitHub();
+            openRifaDetails(rifaId); 
+            renderAdminView(); 
+        };
+
+        window.rejectRequest = function(rifaId, clientPhone) {
+            const rifa = db.rifas.find(r => r.id === rifaId); if (!rifa) return;
+            rifa.solicitudes = rifa.solicitudes.filter(p => p.telefono !== clientPhone);
+            saveDataToGitHub();
+            openRifaDetails(rifaId);
+            renderAdminView();
+        };
+
         // --- CONTADOR REGRESIVO MANUAL ---
         window.startCountdown = function(id) {
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
-            if (rifa.participantes.length === 0) return alert("No hay clientes apuntados para iniciar el conteo.");
+            if (rifa.participantes.length === 0) return alert("No hay clientes confirmados para iniciar el conteo.");
             const hoursStr = prompt("¿Cuántas horas durará el conteo regresivo antes de cerrar y sortear?");
             if (!hoursStr) return;
             const hours = parseInt(hoursStr);
             if (isNaN(hours) || hours <= 0) return alert("Ingresa un número de horas válido.");
-            
             rifa.countdownActive = true;
             rifa.countdownEndTime = Date.now() + (hours * 3600000);
-            saveDataToGitHub();
-            renderAdminView();
+            saveDataToGitHub(); renderAdminView();
             alert(`Conteo iniciado. La rifa se cerrará en ${hours} horas.`);
         };
 
-        // --- SORTEO Y PARTICIPANTES ---
-        const participantModal = document.getElementById('participantModal'), participantsList = document.getElementById('participantsList');
-        document.getElementById('closePartModalBtn').addEventListener('click', () => participantModal.classList.add('hidden'));
-        window.openParticipants = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; document.getElementById('partModalTitle').innerText = `Participantes - ${rifa.name}`; participantsList.innerHTML = !rifa.participantes || rifa.participantes.length === 0 ? '<p class="text-gray-500">Sin participantes.</p>' : rifa.participantes.map(p => `<div class="flex items-center gap-3 bg-white/5 p-2 rounded-lg"><img src="${p.foto || 'https://via.placeholder.com/40'}" class="w-10 h-10 rounded-full object-cover"><div><p class="font-bold">${p.nombre}</p><p class="text-xs text-gray-400">Tel: ${p.telefono} | Boleto: #${p.numero}</p></div></div>`).join(''); participantModal.classList.remove('hidden'); };
-
+        // --- SORTEO ---
         const raffleModal = document.getElementById('raffleModal'), slotMachineText = document.getElementById('slotMachineText'), winnerDisplay = document.getElementById('winnerDisplay');
         window.drawWinner = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa || !rifa.participantes || rifa.participantes.length === 0) return alert("No hay participantes."); raffleModal.classList.remove('hidden'); winnerDisplay.classList.add('hidden'); slotMachineText.classList.remove('hidden'); let count = 0; const interval = setInterval(() => { slotMachineText.innerText = Math.floor(Math.random() * 9999) + 1; count++; if (count > 20) { clearInterval(interval); selectWinner(id); } }, 100); };
         function selectWinner(id) { const rifa = db.rifas.find(r => r.id === id); const winner = rifa.participantes[Math.floor(Math.random() * rifa.participantes.length)]; rifa.winner = winner; saveDataToGitHub(); slotMachineText.classList.add('hidden'); document.getElementById('winnerPhoto').src = winner.foto || 'https://via.placeholder.com/100'; document.getElementById('winnerName').innerText = winner.nombre; document.getElementById('winnerTicket').innerText = `Boleto #${winner.numero}`; winnerDisplay.classList.remove('hidden'); setTimeout(() => { raffleModal.classList.add('hidden'); }, 5000); }
 
         window.exportExcel = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; const ws = XLSX.utils.json_to_sheet(rifa.participantes.map(p => ({ Nombre: p.nombre, Teléfono: p.telefono, Boleto: p.numero }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Participantes"); XLSX.writeFile(wb, `${rifa.name}_participantes.xlsx`); };
 
-        // --- PARTICIPAR (CLIENTE) ---
+        // --- SOLICITAR PARTICIPAR (CLIENTE) ---
         window.joinRifa = function(id) {
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
             if (rifa.countdownActive) return alert("La inscripción a esta rifa ya está cerrada.");
-            if (rifa.participantes && rifa.participantes.length >= rifa.cupo) return alert("Cupo lleno.");
-            if (rifa.participantes.some(p => p.telefono === currentUser.telefono)) return alert("Ya estás participando en esta rifa.");
-            const num = Math.floor(Math.random() * 9999) + 1;
-            rifa.participantes.push({ nombre: currentUser.nombre, telefono: currentUser.telefono, foto: currentUser.foto, numero: num });
-            saveDataToGitHub(); alert(`¡Inscrito! Tu boleto es el #${num}`); renderAll();
+            if (rifa.participantes.length >= rifa.cupo) return alert("Cupo lleno.");
+            if (rifa.participantes.some(p => p.telefono === currentUser.telefono) || rifa.solicitudes.some(p => p.telefono === currentUser.telefono)) return alert("Ya has enviado una solicitud o estás participando.");
+            
+            rifa.solicitudes.push({ nombre: currentUser.nombre, telefono: currentUser.telefono, foto: currentUser.foto });
+            saveDataToGitHub(); alert(`¡Solicitud enviada! Espera la aprobación del administrador.`); renderAll();
         };
 
         // --- RENDERIZADO ---
@@ -486,8 +578,11 @@
             db.rifas.forEach(rifa => {
                 const vendidos = rifa.participantes ? rifa.participantes.length : 0, lleno = vendidos >= rifa.cupo;
                 const progress = (vendidos / rifa.cupo) * 100;
-                let btns = `<div class="flex gap-2 mt-3"><button onclick="openParticipants('${rifa.id}')" class="flex-1 bg-white/10 hover:bg-white/20 text-white text-sm font-bold py-2 rounded-lg">👀 Ver Clientes</button></div>`;
+                const pendientes = rifa.solicitudes ? rifa.solicitudes.length : 0;
                 
+                const notifBadge = pendientes > 0 ? `<div class="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full bounce-notif shadow-lg z-10">🔔 ${pendientes} Nuevas</div>` : '';
+
+                let btns = `<div class="flex gap-2 mt-3"><button onclick="openRifaDetails('${rifa.id}')" class="flex-1 bg-cyan-600/80 hover:bg-cyan-500 text-white text-sm font-bold py-2 rounded-lg transition">📋 Ver Detalles</button></div>`;
                 if (rifa.winner) {
                     btns = `<div class="mt-3 text-center text-yellow-400 font-bold p-2 bg-yellow-500/10 rounded-lg">🏆 Ganador: ${rifa.winner.nombre} (#${rifa.winner.numero})</div>`;
                 } else if (rifa.countdownActive && Date.now() >= rifa.countdownEndTime) {
@@ -496,8 +591,9 @@
                     btns += `<button onclick="startCountdown('${rifa.id}')" class="w-full mt-3 bg-yellow-600/80 hover:bg-yellow-500 text-white text-sm font-bold py-2 rounded-lg">⏱️ Iniciar Conteo</button>`;
                 }
 
-                const card = document.createElement('div'); card.className = 'glass rounded-2xl overflow-hidden flex flex-col';
+                const card = document.createElement('div'); card.className = 'glass rounded-2xl overflow-hidden flex flex-col relative';
                 card.innerHTML = `
+                    ${notifBadge}
                     <div class="relative overflow-hidden h-64">
                         <img src="${rifa.images[0]}" data-carousel="${rifa.id}" data-idx="0" class="carousel-img w-full h-full object-cover">
                         <div class="absolute top-2 left-2 flex gap-2"><button onclick="editRifa('${rifa.id}')" class="bg-black/60 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm hover:bg-purple-600">✏️ Editar</button></div>
@@ -524,20 +620,18 @@
             db.rifas.forEach(rifa => {
                 const vendidos = rifa.participantes ? rifa.participantes.length : 0, lleno = vendidos >= rifa.cupo;
                 const yaParticipa = rifa.participantes && rifa.participantes.some(p => p.telefono === currentUser.telefono);
+                const estaPendiente = rifa.solicitudes && rifa.solicitudes.some(p => p.telefono === currentUser.telefono);
                 let btnHtml = '';
                 
                 if (rifa.winner) {
                     btnHtml = `<div class="mt-3 text-center text-yellow-400 font-bold p-3 bg-yellow-500/10 rounded-lg">🏆 Ganó: ${rifa.winner.nombre} (#${rifa.winner.numero})</div>`;
-                } else if (rifa.countdownActive) {
-                    if (yaParticipa) {
-                        const miBoleto = rifa.participantes.find(p => p.telefono === currentUser.telefono);
-                        btnHtml = `<button class="w-full mt-3 bg-green-600/80 text-white font-bold py-3 rounded-xl cursor-default">✅ Participando (#${miBoleto.numero})</button>`;
-                    } else {
-                        btnHtml = `<button class="w-full mt-3 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold cursor-not-allowed">Inscripción Cerrada</button>`;
-                    }
                 } else if (yaParticipa) {
                     const miBoleto = rifa.participantes.find(p => p.telefono === currentUser.telefono);
                     btnHtml = `<button class="w-full mt-3 bg-green-600/80 text-white font-bold py-3 rounded-xl cursor-default">✅ Participando (#${miBoleto.numero})</button>`;
+                } else if (estaPendiente) {
+                    btnHtml = `<button class="w-full mt-3 bg-yellow-500/80 text-white font-bold py-3 rounded-xl cursor-default">⏳ Esperando Aprobación</button>`;
+                } else if (rifa.countdownActive) {
+                    btnHtml = `<button class="w-full mt-3 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold cursor-not-allowed">Inscripción Cerrada</button>`;
                 } else if (lleno) {
                     btnHtml = `<button class="w-full mt-3 bg-gray-700 text-gray-400 py-3 rounded-xl font-bold cursor-not-allowed">Cupo Lleno</button>`;
                 } else {
@@ -568,20 +662,17 @@
             db.rifas.forEach(rifa => {
                 if (!rifa.countdownActive && !rifa.winner) return;
                 const el = document.getElementById(`countdown-${rifa.id}`);
-                if (!el) return;
-                
-                if (rifa.winner) { el.innerText = ""; return; }
-                
+                const elDet = document.getElementById(`countdown-${rifa.id}-details`);
+                if (!el && !elDet) return;
+                if (rifa.winner) { if(el) el.innerText = ""; if(elDet) elDet.innerText=""; return; }
                 const diff = rifa.countdownEndTime - Date.now();
-                if (diff <= 0) {
-                    el.innerText = "¡Sorteo Inminente!";
-                    el.classList.remove('text-yellow-400');
-                    el.classList.add('text-red-400');
-                    return;
+                let text = "";
+                if (diff <= 0) { text = "¡Sorteo Inminente!"; } else {
+                    const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+                    text = `⏳ Cierra en: ${d}d ${h}h ${m}m ${s}s`;
                 }
-                const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                el.innerText = `⏳ Cierra en: ${d}d ${h}h ${m}m ${s}s`;
-                el.classList.add('text-yellow-400');
+                if(el) { el.innerText = text; el.classList.add('text-yellow-400'); if(diff<=0) { el.classList.remove('text-yellow-400'); el.classList.add('text-red-400'); } }
+                if(elDet) { elDet.innerText = text; }
             });
         }
         setInterval(updateCountdowns, 1000);
