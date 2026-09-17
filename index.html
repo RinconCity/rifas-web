@@ -17,16 +17,17 @@
         .modal-overlay { background-color: rgba(0,0,0,0.8); }
         .slot-machine { font-family: monospace; font-size: 4rem; font-weight: bold; color: #22d3ee; text-shadow: 0 0 20px #22d3ee; }
         #saveIndicator { position: fixed; bottom: 20px; left: 20px; padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,0.7); display: none; z-index: 100; }
-        #syncIndicator { position: fixed; bottom: 20px; right: 20px; padding: 8px 16px; border-radius: 20px; background: rgba(0,0,0,0.7); display: none; z-index: 100; font-size: 0.75rem; color: #a78bfa; }
         .bounce-notif { animation: bounceNotif 1s infinite; }
         @keyframes bounceNotif { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
         #toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 12px 24px; border-radius: 12px; font-weight: bold; box-shadow: 0 10px 15px rgba(0,0,0,0.3); display: none; z-index: 200; }
+        #syncStatus { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: #a78bfa; z-index: 100; background: rgba(0,0,0,0.5); padding: 4px 8px; border-radius: 8px; }
     </style>
 </head>
 <body class="text-white">
 
-    <!-- TOAST PARA NOTIFICACIONES NO BLOQUEANTES -->
+    <!-- TOAST Y STATUS -->
     <div id="toast"></div>
+    <div id="syncStatus">Inactivo</div>
 
     <!-- LOGIN -->
     <div id="loginScreen" class="w-full max-w-md mx-auto text-center relative z-10 py-10">
@@ -46,7 +47,7 @@
         </div>
     </div>
 
-    <!-- VISTA ADMIN (DASHBOARD) -->
+    <!-- VISTA ADMIN -->
     <div id="adminView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex flex-col sm:flex-row justify-between items-center mb-8 pb-6 border-b border-white/10 gap-4">
             <h1 class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">PANEL ADMINISTRADOR</h1>
@@ -55,14 +56,12 @@
                 <button id="logoutBtn" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Salir</button>
             </div>
         </header>
-
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Ganancias</p><p id="statRevenue" class="text-2xl font-bold text-green-500">$0.00</p></div><span class="text-3xl">💰</span></div>
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Boletos</p><p id="statTickets" class="text-2xl font-bold text-cyan-400">0</p></div><span class="text-3xl">🎟️</span></div>
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Rifas</p><p id="statRifas" class="text-2xl font-bold text-purple-400">0</p></div><span class="text-3xl">🎁</span></div>
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Clientes</p><p id="statClients" class="text-2xl font-bold text-yellow-400">0</p></div><span class="text-3xl">👥</span></div>
         </div>
-
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <h2 class="text-2xl font-bold text-gray-300">Rifas Disponibles</h2>
             <button id="toggleFormBtn" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg shadow-purple-500/20">
@@ -70,7 +69,6 @@
                 Agregar Rifa
             </button>
         </div>
-
         <div id="formContainer" class="hidden glass p-6 md:p-8 rounded-3xl mb-10">
             <div class="flex justify-between items-center mb-6"><h3 id="formTitle" class="text-xl font-bold text-cyan-400">Crear Nueva Rifa</h3><button id="cancelFormBtn" class="text-gray-400 hover:text-white text-sm">Cerrar ✕</button></div>
             <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -78,7 +76,6 @@
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Nombre del Producto</label><input type="text" id="productName" placeholder="Ej: iPhone 15 Pro" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Monto a pagar ($)</label><input type="number" id="productPrice" placeholder="Ej: 50" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Cupo máximo</label><input type="number" id="productCupo" placeholder="Ej: 100" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
-                
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <label class="text-sm text-gray-400">Fotos (Máximo 5)</label>
                     <div id="imagePreviewContainer" class="flex flex-wrap gap-3 mb-3"></div>
@@ -92,29 +89,15 @@
                     </div>
                     <input type="file" id="fileInputPc" accept="image/*" multiple hidden><input type="file" id="fileInputCamera" accept="image/*" capture="environment" hidden>
                 </div>
-                
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <label class="text-sm text-gray-400">Cambio de imágenes en la tarjeta</label>
                     <div class="flex gap-3">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="rifaTransition" value="3000" class="peer hidden" required>
-                            <div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">3s</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="rifaTransition" value="5000" class="peer hidden">
-                            <div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">5s</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="rifaTransition" value="8000" class="peer hidden">
-                            <div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">8s</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="rifaTransition" value="0" class="peer hidden">
-                            <div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-red-500 peer-checked:border-red-500 hover:bg-white/5 text-sm font-bold transition">0s (Fija)</div>
-                        </label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="rifaTransition" value="3000" class="peer hidden" required><div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">3s</div></label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="rifaTransition" value="5000" class="peer hidden"><div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">5s</div></label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="rifaTransition" value="8000" class="peer hidden"><div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-cyan-500 peer-checked:border-cyan-500 hover:bg-white/5 text-sm font-bold transition">8s</div></label>
+                        <label class="flex-1 cursor-pointer"><input type="radio" name="rifaTransition" value="0" class="peer hidden"><div class="w-full text-center py-3 border border-white/10 rounded-lg peer-checked:bg-red-500 peer-checked:border-red-500 hover:bg-white/5 text-sm font-bold transition">0s (Fija)</div></label>
                     </div>
                 </div>
-
                 <div class="md:col-span-2 flex flex-wrap gap-4 items-center">
                     <button type="submit" id="createBtn" class="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-xl transition transform hover:scale-105 shadow-lg shadow-purple-500/30">Guardar Rifa</button>
                     <button type="button" id="cancelEditBtn" class="hidden flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-8 rounded-xl transition">Cancelar</button>
@@ -122,11 +105,10 @@
                 </div>
             </form>
         </div>
-
         <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
-    <!-- VISTA DETALLES DE LA RIFA -->
+    <!-- VISTA DETALLES RIFA -->
     <div id="rifaDetailsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Detalles de la Rifa</h1>
@@ -153,7 +135,7 @@
         </div>
     </div>
 
-    <!-- VISTA GESTIÓN DE CLIENTES -->
+    <!-- VISTA GESTIÓN CLIENTES -->
     <div id="clientsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Gestión de Clientes</h1>
@@ -231,7 +213,7 @@
         </div>
     </div>
 
-    <!-- MODAL CONFIGURACIÓN CLIENTE -->
+    <!-- MODAL CONFIG CLIENTE -->
     <div id="clientSettingsModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
         <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-md relative">
             <button id="closeClientSettingsBtn" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
@@ -246,10 +228,9 @@
     </div>
 
     <div id="saveIndicator" class="text-sm font-bold text-cyan-400">💾 Guardando en GitHub...</div>
-    <div id="syncIndicator" class="text-sm font-bold text-purple-400">🔄 Sincronizando...</div>
 
     <script>
-        // --- CONFIGURACIÓN Y SEGURIDAD ---
+        // --- CONFIG ---
         const SECRET_KEY = "y28c1992Y@";
         let db = { rifas: [], usuarios: [] };
         let currentUser = null;
@@ -257,18 +238,18 @@
         let isSaving = false;
         let currentDetailsId = null; 
 
-        // --- DATOS DE GITHUB ---
+        // --- GITHUB ---
         const GH_USER = "RinconCity";
         const GH_REPO = "rifas-datos";
         const _tk1 = "ghp_lrpUZn", _tk2 = "7t8e34yKMp", _tk3 = "OoRoFPdJUr", _tk4 = "WCDx4ZbCGz";
         const GH_TOKEN = _tk1 + _tk2 + _tk3 + _tk4;
 
-        // --- ELEMENTOS UI ---
+        // --- UI ---
         const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView'), clientsView = document.getElementById('clientsView'), rifaDetailsView = document.getElementById('rifaDetailsView');
         const passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
-        const syncIndicator = document.getElementById('syncIndicator');
         const toast = document.getElementById('toast');
+        const syncStatus = document.getElementById('syncStatus');
 
         function showToast(msg) {
             toast.innerText = msg;
@@ -276,7 +257,7 @@
             setTimeout(() => { toast.style.display = 'none'; }, 3500);
         }
 
-        // --- LOGIN UNIFICADO ---
+        // --- LOGIN ---
         async function attemptLogin() {
             const key = passwordInput.value.trim();
             errorMsg.classList.add('hidden');
@@ -308,7 +289,7 @@
         logoutBtn.addEventListener('click', logout);
         logoutBtn2.addEventListener('click', logout);
 
-        // --- CONFIGURACIÓN CLIENTE ---
+        // --- CONFIG CLIENTE ---
         document.getElementById('clientSettingsBtn').addEventListener('click', () => {
             document.getElementById('newClientPass').value = currentUser.password || '';
             document.getElementById('clientSettingsModal').classList.remove('hidden');
@@ -327,14 +308,14 @@
             }
         });
 
-        // --- NAVEGACIÓN ENTRE APARTADOS ---
+        // --- NAVEGACIÓN ---
         document.getElementById('adminUsersBtn').addEventListener('click', () => { adminView.classList.add('hidden'); clientsView.classList.remove('hidden'); renderUsers(); window.scrollTo(0, 0); });
         document.getElementById('clientsBackToDashBtn').addEventListener('click', () => { clientsView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
         document.getElementById('editUserBackBtn').addEventListener('click', () => { editUserView.classList.add('hidden'); clientsView.classList.remove('hidden'); });
         document.getElementById('editUserDashboardBtn').addEventListener('click', () => { editUserView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
         document.getElementById('detailsBackBtn').addEventListener('click', () => { currentDetailsId = null; rifaDetailsView.classList.add('hidden'); adminView.classList.remove('hidden'); renderAdminView(); });
 
-        // --- GENERADOR ID 8 CARACTERES ---
+        // --- ID GENERATOR ---
         function generateId() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let id = '';
@@ -342,7 +323,7 @@
             return db.usuarios.some(u => u.id === id) ? generateId() : id;
         }
 
-        // --- GESTIONAR USUARIOS ---
+        // --- USERS ---
         const usersList = document.getElementById('usersList');
         let tempNewUserPhoto = null, tempEditUserPhoto = null;
 
@@ -415,7 +396,6 @@
             }
         });
 
-        // --- ENVIAR ID Y LINK POR WHATSAPP ---
         document.getElementById('sendWhatsAppIdBtn').addEventListener('click', () => {
             const id = document.getElementById('editUserIdDisplay').value;
             const name = document.getElementById('editUserName').value;
@@ -433,7 +413,10 @@
 
         async function loadDataFromGitHub() {
             try {
-                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
+                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { 
+                    headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' },
+                    cache: 'no-store'
+                });
                 if (res.status === 404) { db = { rifas: [], usuarios: [] }; currentSha = null; renderAll(); startCarousel(); return; }
                 if (!res.ok) throw new Error("Error al cargar");
                 const data = await res.json();
@@ -461,12 +444,22 @@
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
-        // --- SINCRONIZACIÓN AUTOMÁTICA (ULTRA RÁPIDA Y NO BLOQUEANTE) ---
+        // --- SINCRONIZACIÓN FORZADA ---
         async function syncData() {
             if (!currentSha || isSaving || !currentUser) return;
             try {
+                const timeStr = new Date().toLocaleTimeString();
+                syncStatus.innerText = `🔄 Revisando: ${timeStr}`;
+                
                 const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
-                    headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' } 
+                    headers: { 
+                        'Authorization': `token ${GH_TOKEN}`, 
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    cache: 'no-store'
                 });
                 if (!res.ok) return;
                 const data = await res.json();
@@ -489,14 +482,17 @@
                     }
                     
                     refreshCurrentView(); 
+                    syncStatus.innerText = `✅ Actualizado: ${timeStr}`;
                     
                     if (newRequests && currentUser.role === 'admin') {
                         showToast("🔔 ¡Tienes nuevas solicitudes de participación!");
                     }
                 }
-            } catch (e) { console.error("Error de sincronización", e); }
+            } catch (e) { 
+                console.error("Error de sincronización", e); 
+                syncStatus.innerText = "❌ Error de red";
+            }
         }
-        // Reducido a 5 segundos para que fluya casi inmediatamente
         setInterval(syncData, 5000);
 
         function refreshCurrentView() {
@@ -508,7 +504,7 @@
 
         function compressImage(file, mw, cb) { const r = new FileReader(); r.onload = (e) => { const img = new Image(); img.onload = () => { let w = img.width, h = img.height; if (w > mw) { h = (h * mw) / w; w = mw; } const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img, 0, 0, w, h); cb(c.toDataURL('image/jpeg', 0.7)); }; img.src = e.target.result; }; r.readAsDataURL(file); }
 
-        // --- FORMULARIO RIFAS ---
+        // --- RIFAS FORM ---
         const toggleFormBtn = document.getElementById('toggleFormBtn'), formContainer = document.getElementById('formContainer'), productForm = document.getElementById('productForm'), deleteRifaBtn = document.getElementById('deleteRifaBtn');
         let tempImages = [], editingId = null;
         toggleFormBtn.addEventListener('click', () => { resetForm(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
@@ -549,7 +545,7 @@
             renderImagePreviews(); formContainer.classList.remove('hidden'); formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
         };
 
-        // --- DETALLES DE RIFA Y APROBACIONES ---
+        // --- APROBACIONES ---
         window.openRifaDetails = function(id) {
             currentDetailsId = id;
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
@@ -608,7 +604,7 @@
             renderAdminView();
         };
 
-        // --- CONTADOR REGRESIVO MANUAL ---
+        // --- COUNTDOWN ---
         window.startCountdown = function(id) {
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
             if (rifa.participantes.length === 0) return alert("No hay clientes confirmados para iniciar el conteo.");
@@ -629,7 +625,7 @@
 
         window.exportExcel = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; const ws = XLSX.utils.json_to_sheet(rifa.participantes.map(p => ({ Nombre: p.nombre, Teléfono: p.telefono, Boleto: p.numero }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Participantes"); XLSX.writeFile(wb, `${rifa.name}_participantes.xlsx`); };
 
-        // --- SOLICITAR PARTICIPAR (CLIENTE) ---
+        // --- JOIN ---
         window.joinRifa = function(id) {
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
             if (rifa.countdownActive) return alert("La inscripción a esta rifa ya está cerrada.");
@@ -640,7 +636,7 @@
             saveDataToGitHub(); showToast(`¡Solicitud enviada! Espera la aprobación.`); renderAll();
         };
 
-        // --- RENDERIZADO ---
+        // --- RENDER ---
         function renderAll() {
             if (currentUser && currentUser.role === 'admin') renderAdminView();
             if (currentUser && currentUser.role === 'user') renderClientView();
@@ -733,7 +729,7 @@
             });
         }
 
-        // --- CARRUSEL POR RIFA Y COUNTDOWN ---
+        // --- CARRUSEL Y COUNTDOWN ---
         let carouselInterval;
         window.carouselState = window.carouselState || {};
         
