@@ -89,7 +89,6 @@
                     <input type="file" id="fileInputPc" accept="image/*" multiple hidden><input type="file" id="fileInputCamera" accept="image/*" capture="environment" hidden>
                 </div>
                 
-                <!-- CASILLAS DE TIEMPO DE CARRUSEL -->
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <label class="text-sm text-gray-400">Cambio de imágenes en la tarjeta</label>
                     <div class="flex gap-3">
@@ -450,21 +449,42 @@
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
-        // --- SINCRONIZACIÓN AUTOMÁTICA ---
+        // --- SINCRONIZACIÓN AUTOMÁTICA (CORREGIDA Y CON ALERTAS) ---
         async function syncData() {
             if (!currentSha || isSaving || !currentUser) return;
             syncIndicator.style.display = 'block';
             try {
-                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
+                // Agregado cache-buster para evitar que el navegador devuelva datos viejos
+                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
+                    headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' } 
+                });
                 if (!res.ok) return;
                 const data = await res.json();
+                
                 if (data.sha !== currentSha) {
+                    // Hay datos nuevos en GitHub
+                    let prevPendientes = {};
+                    db.rifas.forEach(r => prevPendientes[r.id] = r.solicitudes ? r.solicitudes.length : 0);
+                    
                     const content = decodeBase64(data.content);
                     db = JSON.parse(content) || { rifas: [], usuarios: [] };
                     db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; if(r.transitionTime === undefined) r.transitionTime = 3000; });
                     db.usuarios.forEach(u => { if(!u.password) u.password = ""; });
-                    currentSha = data.sha;
+                    currentSha = data.sha; // FIX CRÍTICO: Actualizar el SHA correctamente
+                    
+                    // Verificar si hay nuevas solicitudes para alertar al admin
+                    let newRequests = false;
+                    if (currentUser.role === 'admin') {
+                        db.rifas.forEach(r => {
+                            if (r.solicitudes.length > (prevPendientes[r.id] || 0)) newRequests = true;
+                        });
+                    }
+                    
                     refreshCurrentView(); 
+                    
+                    if (newRequests && currentUser.role === 'admin') {
+                        alert("🔔 ¡Tienes nuevas solicitudes de participación en tus rifas!");
+                    }
                 }
             } catch (e) { console.error("Error de sincronización", e); }
             syncIndicator.style.display = 'none';
@@ -707,7 +727,7 @@
 
         // --- CARRUSEL POR RIFA Y COUNTDOWN ---
         let carouselInterval;
-        window.carouselState = window.carouselState || {}; // Guarda el último tiempo de cambio de cada rifa
+        window.carouselState = window.carouselState || {};
         
         function startCarousel() { 
             clearInterval(carouselInterval); 
@@ -721,7 +741,7 @@
                 if (!rifa || !rifa.images || rifa.images.length <= 1) return;
                 
                 const transTime = rifa.transitionTime !== undefined ? rifa.transitionTime : 3000;
-                if (transTime === 0) return; // Si es 0s, no cambia nunca
+                if (transTime === 0) return;
                 
                 if (!window.carouselState[id]) window.carouselState[id] = Date.now();
                 
