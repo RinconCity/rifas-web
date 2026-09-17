@@ -50,10 +50,12 @@
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <div class="glass p-6 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Ganancias Totales</p><p id="statRevenue" class="text-3xl font-bold text-green-500">$0.00</p></div><span class="text-4xl">💰</span></div>
-            <div class="glass p-6 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Boletos Vendidos</p><p id="statTickets" class="text-3xl font-bold text-cyan-400">0</p></div><span class="text-4xl">🎟️</span></div>
-            <div class="glass p-6 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Rifas Activas</p><p id="statRifas" class="text-3xl font-bold text-purple-400">0</p></div><span class="text-4xl">🎁</span></div>
+        <!-- DASHBOARD STATS (4 columnas) -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+            <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Ganancias</p><p id="statRevenue" class="text-2xl font-bold text-green-500">$0.00</p></div><span class="text-3xl">💰</span></div>
+            <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Boletos</p><p id="statTickets" class="text-2xl font-bold text-cyan-400">0</p></div><span class="text-3xl">🎟️</span></div>
+            <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Rifas</p><p id="statRifas" class="text-2xl font-bold text-purple-400">0</p></div><span class="text-3xl">🎁</span></div>
+            <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Clientes</p><p id="statClients" class="text-2xl font-bold text-yellow-400">0</p></div><span class="text-3xl">👥</span></div>
         </div>
 
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -97,6 +99,46 @@
         <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
+    <!-- VISTA EDITAR CLIENTE (Reemplaza al Modal) -->
+    <div id="editUserView" class="hidden w-full max-w-2xl mx-auto relative z-10 py-4">
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Editar Cliente</h1>
+            <button id="backToDashboardBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Volver</button>
+        </header>
+        
+        <div class="glass p-6 md:p-8 rounded-3xl flex flex-col gap-6">
+            <div class="flex justify-center">
+                <img id="editUserPhotoPreview" src="https://via.placeholder.com/120" class="w-28 h-28 rounded-full object-cover border-4 border-cyan-500">
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-sm text-gray-400">ID del Cliente (Su Contraseña)</label>
+                <input type="text" id="editUserIdDisplay" readonly class="w-full p-3 bg-gray-800/50 border border-white/10 rounded-xl text-cyan-400 font-mono text-center text-2xl font-bold tracking-widest">
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Nombre</label><input type="text" id="editUserName" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></div>
+                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Teléfono (WhatsApp)</label><input type="tel" id="editUserPhone" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></div>
+            </div>
+            
+            <div class="flex gap-3">
+                <input type="file" id="editUserPhotoPc" accept="image/*" class="hidden">
+                <input type="file" id="editUserPhotoCam" accept="image/*" capture="environment" class="hidden">
+                <button type="button" id="btnEditPhotoPc" class="flex-1 bg-white/5 border border-dashed border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">💻 Cambiar Foto</button>
+                <button type="button" id="btnEditPhotoCam" class="flex-1 bg-white/5 border border-dashed border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">📸 Cámara</button>
+            </div>
+
+            <button type="button" id="sendWhatsAppIdBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2 text-lg">
+                📤 Enviar ID por WhatsApp
+            </button>
+            
+            <div class="flex gap-4 mt-4">
+                <button type="button" id="saveUserChangesBtn" class="flex-1 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-4 px-8 rounded-xl transition">Guardar Cambios</button>
+                <button type="button" id="deleteUserBtn" class="bg-red-600/80 hover:bg-red-500 text-white font-bold py-4 px-8 rounded-xl transition">🗑️</button>
+            </div>
+        </div>
+    </div>
+
     <!-- VISTA CLIENTE -->
     <div id="clientView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
@@ -136,42 +178,6 @@
 
             <h3 class="text-lg font-bold mb-4">Lista de Clientes (Toca para editar)</h3>
             <div id="usersList" class="flex flex-col gap-3"></div>
-        </div>
-    </div>
-
-    <!-- MODAL EDITAR USUARIO (ADMIN) -->
-    <div id="editUserModal" class="modal-overlay fixed inset-0 z-[55] flex items-center justify-center hidden p-4">
-        <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-md relative">
-            <button id="closeEditUserModal" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
-            <h2 class="text-2xl font-bold mb-6 text-cyan-400">Editar Cliente</h2>
-            
-            <div class="flex flex-col gap-4">
-                <div class="flex justify-center mb-2">
-                    <img id="editUserPhotoPreview" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full object-cover border-4 border-cyan-500">
-                </div>
-                
-                <input type="hidden" id="editUserId">
-                <div class="flex flex-col gap-2">
-                    <label class="text-sm text-gray-400">ID del Cliente (Contraseña)</label>
-                    <input type="text" id="editUserIdDisplay" readonly class="w-full p-3 bg-gray-800/50 border border-white/10 rounded-xl text-cyan-400 font-mono text-center text-xl font-bold">
-                </div>
-                
-                <input type="text" id="editUserName" placeholder="Nombre" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                <input type="tel" id="editUserPhone" placeholder="Teléfono" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                
-                <div class="flex gap-2">
-                    <input type="file" id="editUserPhotoPc" accept="image/*" class="hidden">
-                    <input type="file" id="editUserPhotoCam" accept="image/*" capture="environment" class="hidden">
-                    <button type="button" id="btnEditPhotoPc" class="flex-1 bg-white/5 border border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">💻 Cambiar Foto</button>
-                    <button type="button" id="btnEditPhotoCam" class="flex-1 bg-white/5 border border-white/20 text-gray-300 font-bold py-3 px-4 rounded-xl text-sm">📸 Cámara</button>
-                </div>
-
-                <button type="button" id="sendWhatsAppIdBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
-                    📤 Enviar ID por WhatsApp
-                </button>
-                <button type="button" id="saveUserChangesBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-3 rounded-xl transition">Guardar Cambios</button>
-                <button type="button" id="deleteUserBtn" class="w-full bg-red-600/80 hover:bg-red-500 text-white font-bold py-3 rounded-xl transition">🗑️ Eliminar Cliente</button>
-            </div>
         </div>
     </div>
 
@@ -228,30 +234,29 @@
         const _tk1 = "ghp_lrpUZn", _tk2 = "7t8e34yKMp", _tk3 = "OoRoFPdJUr", _tk4 = "WCDx4ZbCGz";
         const GH_TOKEN = _tk1 + _tk2 + _tk3 + _tk4;
 
-        // --- LOGIN UNIFICADO ---
-        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView');
+        // --- ELEMENTOS UI ---
+        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView');
         const passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
 
+        // --- LOGIN UNIFICADO ---
         async function attemptLogin() {
             const key = passwordInput.value.trim();
             errorMsg.classList.add('hidden');
-
             if (key === SECRET_KEY) {
                 currentUser = { role: 'admin' };
                 loginScreen.classList.add('hidden');
                 adminView.classList.remove('hidden');
                 await loadDataFromGitHub();
             } else if (key.length > 0) {
-                await loadDataFromGitHub(); // Cargar DB para verificar ID
+                await loadDataFromGitHub();
                 const user = db.usuarios.find(u => u.id === key.toUpperCase());
                 if (user) {
                     currentUser = { role: 'user', ...user };
                     loginScreen.classList.add('hidden');
                     clientView.classList.remove('hidden');
                     document.getElementById('clientName').innerText = currentUser.nombre;
-                    renderClientView();
-                    startCarousel();
+                    renderClientView(); startCarousel();
                 } else {
                     errorMsg.classList.remove('hidden');
                     loginScreen.classList.add('shake');
@@ -262,7 +267,7 @@
         }
         enterBtn.addEventListener('click', attemptLogin);
         passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
-        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
+        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); editUserView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
         logoutBtn.addEventListener('click', logout);
         logoutBtn2.addEventListener('click', logout);
 
@@ -271,18 +276,20 @@
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let id = '';
             for (let i = 0; i < 8; i++) { id += chars.charAt(Math.floor(Math.random() * chars.length)); }
-            return db.usuarios.some(u => u.id === id) ? generateId() : id; // Evitar duplicados
+            return db.usuarios.some(u => u.id === id) ? generateId() : id;
         }
 
         // --- GESTIONAR USUARIOS ---
-        const usersModal = document.getElementById('usersModal'), usersList = document.getElementById('usersList'), editUserModal = document.getElementById('editUserModal');
+        const usersModal = document.getElementById('usersModal'), usersList = document.getElementById('usersList');
         let tempNewUserPhoto = null, tempEditUserPhoto = null;
 
         document.getElementById('adminUsersBtn').addEventListener('click', () => { renderUsers(); usersModal.classList.remove('hidden'); });
         document.getElementById('closeUsersModal').addEventListener('click', () => usersModal.classList.add('hidden'));
-        document.getElementById('closeEditUserModal').addEventListener('click', () => editUserModal.classList.add('hidden'));
+        document.getElementById('backToDashboardBtn').addEventListener('click', () => {
+            editUserView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+        });
 
-        // Botones Crear Usuario
         document.getElementById('btnPhotoPc').addEventListener('click', () => document.getElementById('newUserPhotoPc').click());
         document.getElementById('btnPhotoCam').addEventListener('click', () => document.getElementById('newUserPhotoCam').click());
         document.getElementById('newUserPhotoPc').addEventListener('change', async (e) => { tempNewUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); alert("Foto cargada"); });
@@ -293,17 +300,12 @@
             let telefono = document.getElementById('newUserPhone').value.trim();
             if (!nombre || !telefono) return alert("Nombre y teléfono obligatorios.");
             if (!tempNewUserPhoto) return alert("Sube una foto.");
-            if (!telefono.startsWith('+')) telefono = '+' + telefono; // Asegurar el +
-
+            if (!telefono.startsWith('+')) telefono = '+' + telefono;
             const newId = generateId();
             db.usuarios.push({ id: newId, nombre, telefono, foto: tempNewUserPhoto });
             saveDataToGitHub();
-            
-            // Limpiar
-            document.getElementById('newUserName').value = ''; 
-            document.getElementById('newUserPhone').value = '+53'; 
-            tempNewUserPhoto = null;
-            renderUsers();
+            document.getElementById('newUserName').value = ''; document.getElementById('newUserPhone').value = '+53'; tempNewUserPhoto = null;
+            renderUsers(); renderAdminView();
             alert(`Cliente creado. Su ID es: ${newId}`);
         });
 
@@ -311,26 +313,22 @@
             usersList.innerHTML = db.usuarios.length === 0 ? '<p class="text-gray-500">Sin clientes.</p>' : db.usuarios.map(u => `
                 <div onclick="openEditUser('${u.id}')" class="flex items-center gap-3 bg-white/5 p-3 rounded-lg cursor-pointer hover:bg-white/10 transition">
                     <img src="${u.foto}" class="w-12 h-12 rounded-full object-cover">
-                    <div class="flex-grow">
-                        <p class="font-bold">${u.nombre}</p>
-                        <p class="text-xs text-gray-400">${u.telefono}</p>
-                        <p class="text-cyan-400 font-mono text-sm font-bold">ID: ${u.id}</p>
-                    </div>
+                    <div class="flex-grow"><p class="font-bold">${u.nombre}</p><p class="text-xs text-gray-400">${u.telefono}</p><p class="text-cyan-400 font-mono text-sm font-bold">ID: ${u.id}</p></div>
                 </div>
             `).join('');
         }
 
-        // Editar Usuario
         window.openEditUser = (id) => {
             const u = db.usuarios.find(x => x.id === id); if (!u) return;
             tempEditUserPhoto = null;
-            document.getElementById('editUserId').value = u.id;
             document.getElementById('editUserIdDisplay').value = u.id;
             document.getElementById('editUserName').value = u.nombre;
             document.getElementById('editUserPhone').value = u.telefono;
             document.getElementById('editUserPhotoPreview').src = u.foto;
             usersModal.classList.add('hidden');
-            editUserModal.classList.remove('hidden');
+            adminView.classList.add('hidden');
+            editUserView.classList.remove('hidden');
+            window.scrollTo(0, 0);
         };
 
         document.getElementById('btnEditPhotoPc').addEventListener('click', () => document.getElementById('editUserPhotoPc').click());
@@ -339,33 +337,32 @@
         document.getElementById('editUserPhotoCam').addEventListener('change', async (e) => { tempEditUserPhoto = await new Promise(res => compressImage(e.target.files[0], 200, res)); document.getElementById('editUserPhotoPreview').src = tempEditUserPhoto; });
 
         document.getElementById('saveUserChangesBtn').addEventListener('click', () => {
-            const id = document.getElementById('editUserId').value;
+            const id = document.getElementById('editUserIdDisplay').value;
             const u = db.usuarios.find(x => x.id === id); if (!u) return;
             u.nombre = document.getElementById('editUserName').value.trim();
             u.telefono = document.getElementById('editUserPhone').value.trim();
             if (tempEditUserPhoto) u.foto = tempEditUserPhoto;
             saveDataToGitHub();
-            editUserModal.classList.add('hidden');
-            renderUsers();
-            usersModal.classList.remove('hidden');
+            editUserView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            renderUsers(); renderAdminView();
         });
 
         document.getElementById('deleteUserBtn').addEventListener('click', () => {
             if (confirm("¿Eliminar cliente?")) {
-                const id = document.getElementById('editUserId').value;
+                const id = document.getElementById('editUserIdDisplay').value;
                 db.usuarios = db.usuarios.filter(x => x.id !== id);
                 saveDataToGitHub();
-                editUserModal.classList.add('hidden');
-                renderUsers();
-                usersModal.classList.remove('hidden');
+                editUserView.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                renderUsers(); renderAdminView();
             }
         });
 
-        // Enviar WhatsApp
         document.getElementById('sendWhatsAppIdBtn').addEventListener('click', () => {
             const id = document.getElementById('editUserIdDisplay').value;
             const name = document.getElementById('editUserName').value;
-            const tel = document.getElementById('editUserPhone').value.replace(/[^0-9]/g, ''); // Limpiar +53 -> 53
+            const tel = document.getElementById('editUserPhone').value.replace(/[^0-9]/g, '');
             const msg = `Hola ${name}! Este es tu ID para entrar en la pagina de rifas: ${id}`;
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         });
@@ -385,8 +382,7 @@
                 currentSha = data.sha;
                 const content = decodeBase64(data.content);
                 db = JSON.parse(content) || { rifas: [], usuarios: [] };
-                renderAll();
-                startCarousel();
+                renderAll(); startCarousel();
             } catch (e) { alert("Error al cargar de GitHub."); }
         }
 
@@ -469,6 +465,7 @@
 
         function renderAdminView() {
             document.getElementById('statRifas').innerText = db.rifas.length;
+            document.getElementById('statClients').innerText = db.usuarios.length;
             document.getElementById('statTickets').innerText = db.rifas.reduce((a, b) => a + (b.participantes ? b.participantes.length : 0), 0);
             document.getElementById('statRevenue').innerText = `$${db.rifas.reduce((a, b) => a + ((b.participantes ? b.participantes.length : 0) * b.price), 0).toFixed(2)}`;
             const grid = document.getElementById('gridContainer'); grid.innerHTML = '';
