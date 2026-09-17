@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <!-- VISTA ADMIN -->
+    <!-- VISTA ADMIN (DASHBOARD) -->
     <div id="adminView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex flex-col sm:flex-row justify-between items-center mb-8 pb-6 border-b border-white/10 gap-4">
             <h1 class="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">PANEL ADMINISTRADOR</h1>
@@ -50,7 +50,6 @@
             </div>
         </header>
 
-        <!-- DASHBOARD STATS (4 columnas) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Ganancias</p><p id="statRevenue" class="text-2xl font-bold text-green-500">$0.00</p></div><span class="text-3xl">💰</span></div>
             <div class="glass p-5 rounded-2xl flex items-center justify-between"><div><p class="text-gray-400 text-sm">Boletos</p><p id="statTickets" class="text-2xl font-bold text-cyan-400">0</p></div><span class="text-3xl">🎟️</span></div>
@@ -99,11 +98,40 @@
         <div id="gridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
     </div>
 
-    <!-- VISTA EDITAR CLIENTE (Reemplaza al Modal) -->
+    <!-- VISTA GESTIÓN DE CLIENTES (Reemplaza al Modal) -->
+    <div id="clientsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
+        <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Gestión de Clientes</h1>
+            <button id="clientsBackToDashBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Dashboard</button>
+        </header>
+
+        <div class="glass p-6 md:p-8 rounded-3xl mb-10">
+            <h3 class="text-xl font-bold mb-6 text-cyan-400">Agregar Nuevo Cliente</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Nombre del cliente</label><input type="text" id="newUserName" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white" placeholder="Ej: Juan Pérez"></div>
+                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Teléfono (WhatsApp)</label><input type="tel" id="newUserPhone" value="+53" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white"></div>
+            </div>
+            <div class="flex gap-3 mt-4">
+                <input type="file" id="newUserPhotoPc" accept="image/*" class="hidden">
+                <input type="file" id="newUserPhotoCam" accept="image/*" capture="environment" class="hidden">
+                <button type="button" id="btnPhotoPc" class="flex-1 bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-4 rounded-xl transition text-sm">💻 Galería</button>
+                <button type="button" id="btnPhotoCam" class="flex-1 bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-4 rounded-xl transition text-sm">📸 Cámara</button>
+            </div>
+            <button type="button" id="createUserBtn" class="w-full mt-6 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-4 px-6 rounded-xl transition">Crear Cliente y Generar ID</button>
+        </div>
+
+        <h3 class="text-xl font-bold mb-4 text-gray-300">Clientes Registrados (Toca para editar)</h3>
+        <div id="usersList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- VISTA EDITAR CLIENTE -->
     <div id="editUserView" class="hidden w-full max-w-2xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Editar Cliente</h1>
-            <button id="backToDashboardBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Volver</button>
+            <div class="flex gap-2">
+                <button id="editUserBackBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Atrás</button>
+                <button id="editUserDashboardBtn" class="text-sm bg-cyan-500/20 hover:bg-cyan-500/40 px-4 py-2 rounded-full transition border border-cyan-500/20 font-medium flex items-center gap-2">🏠 Dashboard</button>
+            </div>
         </header>
         
         <div class="glass p-6 md:p-8 rounded-3xl flex flex-col gap-6">
@@ -148,37 +176,8 @@
             </div>
             <button id="logoutBtn2" class="text-sm bg-red-500/20 hover:bg-red-500/40 px-4 py-2 rounded-full transition border border-red-500/20 font-medium">Salir</button>
         </header>
-        
         <h2 class="text-2xl font-bold text-gray-300 mb-6">Rifas Disponibles para Ti</h2>
         <div id="clientGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </div>
-
-    <!-- MODAL GESTIONAR USUARIOS (ADMIN) -->
-    <div id="usersModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
-        <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
-            <button id="closeUsersModal" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
-            <h2 class="text-2xl font-bold mb-6 text-cyan-400">Gestionar Clientes</h2>
-            
-            <div class="mb-6 pb-6 border-b border-white/10">
-                <h3 class="text-lg font-bold mb-4">Agregar Nuevo Cliente</h3>
-                <div class="flex flex-col gap-3">
-                    <input type="text" id="newUserName" placeholder="Nombre del cliente" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                    <input type="tel" id="newUserPhone" value="+53" placeholder="Teléfono (WhatsApp)" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white">
-                    
-                    <div class="flex gap-2">
-                        <input type="file" id="newUserPhotoPc" accept="image/*" class="hidden">
-                        <input type="file" id="newUserPhotoCam" accept="image/*" capture="environment" class="hidden">
-                        <button type="button" id="btnPhotoPc" class="flex-1 bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-4 rounded-xl transition text-sm">💻 Galería</button>
-                        <button type="button" id="btnPhotoCam" class="flex-1 bg-white/5 border border-dashed border-white/20 hover:border-cyan-400 text-gray-300 hover:text-cyan-400 font-bold py-3 px-4 rounded-xl transition text-sm">📸 Cámara</button>
-                    </div>
-                    
-                    <button type="button" id="createUserBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-3 px-6 rounded-xl transition mt-2">Crear Cliente y Generar ID</button>
-                </div>
-            </div>
-
-            <h3 class="text-lg font-bold mb-4">Lista de Clientes (Toca para editar)</h3>
-            <div id="usersList" class="flex flex-col gap-3"></div>
-        </div>
     </div>
 
     <!-- MODAL PARTICIPANTES -->
@@ -235,7 +234,7 @@
         const GH_TOKEN = _tk1 + _tk2 + _tk3 + _tk4;
 
         // --- ELEMENTOS UI ---
-        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView');
+        const loginScreen = document.getElementById('loginScreen'), adminView = document.getElementById('adminView'), clientView = document.getElementById('clientView'), editUserView = document.getElementById('editUserView'), clientsView = document.getElementById('clientsView');
         const passwordInput = document.getElementById('passwordInput'), enterBtn = document.getElementById('enterBtn'), errorMsg = document.getElementById('errorMsg');
         const logoutBtn = document.getElementById('logoutBtn'), logoutBtn2 = document.getElementById('logoutBtn2');
 
@@ -267,9 +266,31 @@
         }
         enterBtn.addEventListener('click', attemptLogin);
         passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') attemptLogin(); });
-        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); editUserView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
+        function logout() { currentUser = null; adminView.classList.add('hidden'); clientView.classList.add('hidden'); editUserView.classList.add('hidden'); clientsView.classList.add('hidden'); loginScreen.classList.remove('hidden'); }
         logoutBtn.addEventListener('click', logout);
         logoutBtn2.addEventListener('click', logout);
+
+        // --- NAVEGACIÓN ENTRE APARTADOS ---
+        document.getElementById('adminUsersBtn').addEventListener('click', () => {
+            adminView.classList.add('hidden');
+            clientsView.classList.remove('hidden');
+            renderUsers();
+            window.scrollTo(0, 0);
+        });
+        document.getElementById('clientsBackToDashBtn').addEventListener('click', () => {
+            clientsView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            renderAdminView();
+        });
+        document.getElementById('editUserBackBtn').addEventListener('click', () => {
+            editUserView.classList.add('hidden');
+            clientsView.classList.remove('hidden');
+        });
+        document.getElementById('editUserDashboardBtn').addEventListener('click', () => {
+            editUserView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            renderAdminView();
+        });
 
         // --- GENERADOR ID 8 CARACTERES ---
         function generateId() {
@@ -280,15 +301,8 @@
         }
 
         // --- GESTIONAR USUARIOS ---
-        const usersModal = document.getElementById('usersModal'), usersList = document.getElementById('usersList');
+        const usersList = document.getElementById('usersList');
         let tempNewUserPhoto = null, tempEditUserPhoto = null;
-
-        document.getElementById('adminUsersBtn').addEventListener('click', () => { renderUsers(); usersModal.classList.remove('hidden'); });
-        document.getElementById('closeUsersModal').addEventListener('click', () => usersModal.classList.add('hidden'));
-        document.getElementById('backToDashboardBtn').addEventListener('click', () => {
-            editUserView.classList.add('hidden');
-            adminView.classList.remove('hidden');
-        });
 
         document.getElementById('btnPhotoPc').addEventListener('click', () => document.getElementById('newUserPhotoPc').click());
         document.getElementById('btnPhotoCam').addEventListener('click', () => document.getElementById('newUserPhotoCam').click());
@@ -310,10 +324,10 @@
         });
 
         function renderUsers() {
-            usersList.innerHTML = db.usuarios.length === 0 ? '<p class="text-gray-500">Sin clientes.</p>' : db.usuarios.map(u => `
-                <div onclick="openEditUser('${u.id}')" class="flex items-center gap-3 bg-white/5 p-3 rounded-lg cursor-pointer hover:bg-white/10 transition">
-                    <img src="${u.foto}" class="w-12 h-12 rounded-full object-cover">
-                    <div class="flex-grow"><p class="font-bold">${u.nombre}</p><p class="text-xs text-gray-400">${u.telefono}</p><p class="text-cyan-400 font-mono text-sm font-bold">ID: ${u.id}</p></div>
+            usersList.innerHTML = db.usuarios.length === 0 ? '<p class="text-gray-500 col-span-full text-center py-6">Sin clientes registrados.</p>' : db.usuarios.map(u => `
+                <div onclick="openEditUser('${u.id}')" class="flex items-center gap-3 bg-white/5 p-4 rounded-xl cursor-pointer hover:bg-white/10 transition border border-white/10">
+                    <img src="${u.foto}" class="w-14 h-14 rounded-full object-cover">
+                    <div class="flex-grow overflow-hidden"><p class="font-bold truncate">${u.nombre}</p><p class="text-xs text-gray-400">${u.telefono}</p><p class="text-cyan-400 font-mono text-sm font-bold mt-1">ID: ${u.id}</p></div>
                 </div>
             `).join('');
         }
@@ -325,8 +339,7 @@
             document.getElementById('editUserName').value = u.nombre;
             document.getElementById('editUserPhone').value = u.telefono;
             document.getElementById('editUserPhotoPreview').src = u.foto;
-            usersModal.classList.add('hidden');
-            adminView.classList.add('hidden');
+            clientsView.classList.add('hidden');
             editUserView.classList.remove('hidden');
             window.scrollTo(0, 0);
         };
@@ -344,7 +357,7 @@
             if (tempEditUserPhoto) u.foto = tempEditUserPhoto;
             saveDataToGitHub();
             editUserView.classList.add('hidden');
-            adminView.classList.remove('hidden');
+            clientsView.classList.remove('hidden');
             renderUsers(); renderAdminView();
         });
 
@@ -354,7 +367,7 @@
                 db.usuarios = db.usuarios.filter(x => x.id !== id);
                 saveDataToGitHub();
                 editUserView.classList.add('hidden');
-                adminView.classList.remove('hidden');
+                clientsView.classList.remove('hidden');
                 renderUsers(); renderAdminView();
             }
         });
@@ -535,7 +548,7 @@
         let carouselTimeout;
         function startCarousel() { clearTimeout(carouselTimeout); if (settings.transitionTime === 0) return; carouselTimeout = setTimeout(() => { advanceCarousels(); startCarousel(); }, settings.transitionTime); }
         function advanceCarousels() { document.querySelectorAll('[data-carousel]').forEach(img => { const id = img.dataset.carousel; const rifa = db.rifas.find(r => r.id === id); if (!rifa || rifa.images.length <= 1) return; img.style.opacity = 0; setTimeout(() => { let i = parseInt(img.dataset.idx); i = (i + 1) % rifa.images.length; img.src = rifa.images[i]; img.dataset.idx = i; img.style.opacity = 1; }, 400); }); }
-        function updateCountdowns() { db.rifas.forEach(rifa => { if (rifa.winner) return; const el = document.getElementById(`countdown-${rifa.id}`); if (!el || !rifa.endDate) return; const diff = rifa.endDate - Date.now(); if (diff <= 0) { el.innerText = "¡Sorteo Inminente!"; return; } const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏳ Termina en: ${d}d ${h}h ${m}m ${s}s`; }); }
+        function updateCountdowns() { db.rifas.forEach(rifa => { if (rifa.winner) return; const el = document.getElementById(`countdown-${rifa.id}`); if (!el || !rifa.endDate) return; const diff = rifa.endDate - Date.now(); if (diff <= 0) { el.innerText = "¡Sorteo Inminente!"; return; } const d = Math.floor(diff / 86400000), h = Math.floor((diff % 86400000) / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000); el.innerText = `⏳ Termina en: ${d}d ${h}h ${m}m ${s}s;` }); }
         setInterval(updateCountdowns, 1000);
     </script>
 </body>
