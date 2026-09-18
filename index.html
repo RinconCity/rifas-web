@@ -73,7 +73,7 @@
                 <input type="hidden" id="editingId">
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Nombre del Producto</label><input type="text" id="productName" placeholder="Ej: iPhone 15 Pro" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
                 <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Monto a pagar ($)</label><input type="number" id="productPrice" placeholder="Ej: 50" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
-                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Cupo máximo (Define los números disponibles)</label><input type="number" id="productCupo" placeholder="Ej: 100" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
+                <div class="flex flex-col gap-2"><label class="text-sm text-gray-400">Cupo máximo (Generará números aleatorios del 1 al 99)</label><input type="number" id="productCupo" placeholder="Ej: 50" class="glow-input w-full p-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none transition-all" required></div>
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <label class="text-sm text-gray-400">Fotos (Máximo 5)</label>
                     <div id="imagePreviewContainer" class="flex flex-wrap gap-3 mb-3"></div>
@@ -258,6 +258,25 @@
         </div>
     </div>
 
+    <!-- MODAL INICIAR CONTEO (ADMIN) -->
+    <div id="countdownModal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center hidden p-4">
+        <div class="glass rounded-2xl shadow-xl p-6 w-full max-w-md relative">
+            <button id="closeCountdownModal" class="absolute top-2 right-2 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-cyan-400">⏱️ Iniciar Sorteo</h2>
+            <input type="hidden" id="countdownRifaId">
+            <div class="p-4 border border-white/10 rounded-xl">
+                <p class="text-sm text-gray-400 mb-4 text-center">Establece cuánto tiempo durará la rifa antes de cerrar y sortear.</p>
+                <div class="grid grid-cols-3 gap-3 mb-6">
+                    <div class="flex flex-col gap-1"><label class="text-xs text-gray-400 text-center">Días</label><input type="number" id="cdDays" value="0" min="0" class="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white text-center font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500"></div>
+                    <div class="flex flex-col gap-1"><label class="text-xs text-gray-400 text-center">Horas</label><input type="number" id="cdHours" value="1" min="0" class="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white text-center font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500"></div>
+                    <div class="flex flex-col gap-1"><label class="text-xs text-gray-400 text-center">Minutos</label><input type="number" id="cdMinutes" value="0" min="0" class="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white text-center font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500"></div>
+                </div>
+                <button id="startCountdownConfirmBtn" class="w-full bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-3 rounded-xl transition mb-2">Iniciar Conteo Regresivo</button>
+                <button id="instantRevealBtn" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl transition">⚡ Revelar Instantáneamente</button>
+            </div>
+        </div>
+    </div>
+
     <div id="saveIndicator" class="text-sm font-bold text-cyan-400">💾 Guardando en GitHub...</div>
     <div id="syncIndicator" class="text-sm font-bold text-purple-400">🔄 Sincronizando...</div>
 
@@ -351,12 +370,22 @@
         document.getElementById('clientHistoryBtn').addEventListener('click', () => { clientView.classList.add('hidden'); clientHistoryView.classList.remove('hidden'); renderClientHistory(); });
         document.getElementById('historyBackBtn').addEventListener('click', () => { clientHistoryView.classList.add('hidden'); clientView.classList.remove('hidden'); });
 
-        // --- GENERADOR ID 8 CARACTERES ---
+        // --- GENERADOR ID Y POOL DE NÚMEROS ---
         function generateId() {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let id = '';
             for (let i = 0; i < 8; i++) { id += chars.charAt(Math.floor(Math.random() * chars.length)); }
             return db.usuarios.some(u => u.id === id) ? generateId() : id;
+        }
+
+        function generateRandomPool(count, max = 99) {
+            const pool = [];
+            const available = Array.from({length: max}, (_, i) => i + 1); // [1..99]
+            for (let i = 0; i < Math.min(count, max); i++) {
+                const randIdx = Math.floor(Math.random() * available.length);
+                pool.push(available.splice(randIdx, 1)[0]);
+            }
+            return pool.sort((a,b) => a - b); // Ordenados para mostrarlos bonitos
         }
 
         // --- GESTIONAR USUARIOS ---
@@ -437,11 +466,11 @@
             const name = document.getElementById('editUserName').value;
             const tel = document.getElementById('editUserPhone').value.replace(/[^0-9]/g, '');
             const pageLink = "https://rinconcity.github.io/rifas-web/";
-            const msg = `Hola ${name}! Este es tu ID para entrar in la pagina de rifas: ${id}\n\nEntra a este link y usa tu ID para ver las rifas disponibles:\n${pageLink}`;
+            const msg = `Hola ${name}! Este es tu ID para entrar en la pagina de rifas: ${id}\n\nEntra a este link y usa tu ID para ver las rifas disponibles:\n${pageLink}`;
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         });
 
-        // --- GITHUB API (Revertida a la versión simple que funcionaba) ---
+        // --- GITHUB API ---
         function encodeBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]); return btoa(binary); }
         function decodeBase64(b64) { const binary = atob(b64); const bytes = new Uint8Array(binary.length); for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
         const FILE_PATH = "data/db.json";
@@ -456,7 +485,12 @@
                 currentSha = data.sha;
                 const content = decodeBase64(data.content);
                 db = JSON.parse(content) || { rifas: [], usuarios: [] };
-                db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; if(r.transitionTime === undefined) r.transitionTime = 3000; });
+                db.rifas.forEach(r => { 
+                    if(!r.solicitudes) r.solicitudes = []; 
+                    if(!r.participantes) r.participantes = []; 
+                    if(r.transitionTime === undefined) r.transitionTime = 3000;
+                    if(!r.numberPool) r.numberPool = Array.from({length: r.cupo}, (_, i) => i + 1); // Fix old rifas
+                });
                 db.usuarios.forEach(u => { if(!u.password) u.password = ""; });
                 renderAll(); startCarousel();
             } catch (e) { alert("Error al cargar de GitHub."); }
@@ -477,7 +511,7 @@
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
-        // --- SINCRONIZACIÓN AUTOMÁTICA (Revertida a 15s y simple fetch) ---
+        // --- SINCRONIZACIÓN AUTOMÁTICA ---
         async function syncData() {
             if (!currentSha || isSaving || !currentUser) return;
             syncIndicator.style.display = 'block';
@@ -490,7 +524,12 @@
                     db.rifas.forEach(r => prevPendientes[r.id] = r.solicitudes ? r.solicitudes.length : 0);
                     const content = decodeBase64(data.content);
                     db = JSON.parse(content) || { rifas: [], usuarios: [] };
-                    db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; if(r.transitionTime === undefined) r.transitionTime = 3000; });
+                    db.rifas.forEach(r => { 
+                        if(!r.solicitudes) r.solicitudes = []; 
+                        if(!r.participantes) r.participantes = []; 
+                        if(r.transitionTime === undefined) r.transitionTime = 3000;
+                        if(!r.numberPool) r.numberPool = Array.from({length: r.cupo}, (_, i) => i + 1); 
+                    });
                     db.usuarios.forEach(u => { if(!u.password) u.password = ""; });
                     currentSha = data.sha; 
                     let newRequests = false;
@@ -543,7 +582,32 @@
             const transitionInput = document.querySelector('input[name="rifaTransition"]:checked');
             const transitionTime = transitionInput ? parseInt(transitionInput.value) : 3000;
             if (tempImages.length === 0) return alert("Agrega 1 foto.");
-            if (editingId) { const idx = db.rifas.findIndex(r => r.id === editingId); if (idx !== -1) { db.rifas[idx] = { ...db.rifas[idx], name, price, cupo, images: tempImages, transitionTime }; } } else { db.rifas.push({ id: Date.now().toString(), name, price, cupo, images: tempImages, transitionTime, solicitudes: [], participantes: [], winner: null, countdownActive: false, countdownEndTime: null }); }
+            
+            if (editingId) { 
+                const idx = db.rifas.findIndex(r => r.id === editingId); 
+                if (idx !== -1) {
+                    let numberPool = db.rifas[idx].numberPool;
+                    // Si cambió el cupo, regenerar el pool conservando los tomados
+                    if (db.rifas[idx].cupo !== cupo) {
+                        const taken = new Set();
+                        db.rifas[idx].participantes.forEach(p => taken.add(p.numero));
+                        db.rifas[idx].solicitudes.forEach(p => taken.add(p.numero));
+                        let newPool = Array.from(taken);
+                        const maxNum = cupo <= 99 ? 99 : 999; // Si cupo > 99, usar hasta 999
+                        const available = Array.from({length: maxNum}, (_, i) => i + 1).filter(n => !taken.has(n));
+                        while (newPool.length < cupo && available.length > 0) {
+                            const randIdx = Math.floor(Math.random() * available.length);
+                            newPool.push(available.splice(randIdx, 1)[0]);
+                        }
+                        numberPool = newPool.sort((a,b) => a - b);
+                    }
+                    db.rifas[idx] = { ...db.rifas[idx], name, price, cupo, images: tempImages, transitionTime, numberPool }; 
+                } 
+            } else { 
+                const maxNum = cupo <= 99 ? 99 : 999;
+                const numberPool = generateRandomPool(cupo, maxNum);
+                db.rifas.push({ id: Date.now().toString(), name, price, cupo, images: tempImages, transitionTime, numberPool, solicitudes: [], participantes: [], winner: null, countdownActive: false, countdownEndTime: null }); 
+            }
             saveDataToGitHub(); formContainer.classList.add('hidden'); resetForm();
             renderAdminView(); 
         });
@@ -636,13 +700,15 @@
             const myPending = rifa.solicitudes.find(p => p.telefono === currentUser.telefono);
             const myApproved = rifa.participantes.find(p => p.telefono === currentUser.telefono);
 
-            for (let i = 1; i <= rifa.cupo; i++) {
+            if (!rifa.numberPool) rifa.numberPool = Array.from({length: rifa.cupo}, (_, i) => i + 1); // Fallback
+
+            rifa.numberPool.forEach(num => {
                 const btn = document.createElement('button');
                 let classes = 'p-3 rounded-lg font-bold transition text-center ';
-                let isMyPending = myPending && myPending.numero === i;
-                let isMyApproved = myApproved && myApproved.numero === i;
+                let isMyPending = myPending && myPending.numero === num;
+                let isMyApproved = myApproved && myApproved.numero === num;
 
-                if (takenNumbers.has(i) && !isMyPending && !isMyApproved) {
+                if (takenNumbers.has(num) && !isMyPending && !isMyApproved) {
                     classes += 'bg-gray-700 text-gray-500 cursor-not-allowed line-through';
                     btn.disabled = true;
                 } else if (isMyPending) {
@@ -651,12 +717,12 @@
                     classes += 'bg-green-600 text-white cursor-default';
                 } else {
                     classes += 'bg-white/10 hover:bg-cyan-500 text-white cursor-pointer';
-                    btn.onclick = () => selectNumber(i);
+                    btn.onclick = () => selectNumber(num);
                 }
                 btn.className = classes;
-                btn.innerText = i;
+                btn.innerText = num;
                 grid.appendChild(btn);
-            }
+            });
         }
 
         function updateClientRifaButtonState(rifa) {
@@ -734,18 +800,50 @@
             renderClientView();
         };
 
-        // --- CONTADOR REGRESIVO MANUAL ---
+        // --- CONFIGURADOR DE CONTEO REGRESIVO (ADMIN) ---
         window.startCountdown = function(id) {
+            document.getElementById('countdownRifaId').value = id;
+            document.getElementById('cdDays').value = 0;
+            document.getElementById('cdHours').value = 1;
+            document.getElementById('cdMinutes').value = 0;
+            document.getElementById('countdownModal').classList.remove('hidden');
+        };
+
+        document.getElementById('closeCountdownModal').addEventListener('click', () => document.getElementById('countdownModal').classList.add('hidden'));
+
+        function triggerCountdown(id, days, hours, minutes) {
             const rifa = db.rifas.find(r => r.id === id); if (!rifa) return;
             if (rifa.participantes.length === 0) return alert("No hay clientes confirmados para iniciar el conteo.");
-            const hoursStr = prompt("¿Cuántas horas durará el conteo regresivo antes de cerrar y sortear?");
-            if (!hoursStr) return;
-            const hours = parseInt(hoursStr);
-            if (isNaN(hours) || hours <= 0) return alert("Ingresa un número de horas válido.");
+            const ms = (days * 86400000) + (hours * 3600000) + (minutes * 60000);
             rifa.countdownActive = true;
-            rifa.countdownEndTime = Date.now() + (hours * 3600000);
-            saveDataToGitHub(); renderAdminView();
-            showToast(`Conteo iniciado. La rifa se cerrará en ${hours} horas.`);
+            rifa.countdownEndTime = Date.now() + ms;
+            saveDataToGitHub(); 
+            document.getElementById('countdownModal').classList.add('hidden');
+            renderAdminView();
+            showToast(`Conteo iniciado.`);
+        }
+
+        document.getElementById('startCountdownConfirmBtn').addEventListener('click', () => {
+            const id = document.getElementById('countdownRifaId').value;
+            const d = parseInt(document.getElementById('cdDays').value) || 0;
+            const h = parseInt(document.getElementById('cdHours').value) || 0;
+            const m = parseInt(document.getElementById('cdMinutes').value) || 0;
+            if (d === 0 && h === 0 && m === 0) return alert("Debes ingresar al menos 1 minuto.");
+            triggerCountdown(id, d, h, m);
+        });
+
+        document.getElementById('instantRevealBtn').addEventListener('click', () => {
+            const id = document.getElementById('countdownRifaId').value;
+            triggerCountdown(id, 0, 0, 0); // ms = 0, lo que activa el botón de sortear inmediatamente
+        });
+
+        window.deleteRifaDirect = function(id) {
+            if (confirm("¿Eliminar esta rifa permanentemente? Se perderán todos los datos.")) {
+                db.rifas = db.rifas.filter(r => r.id !== id);
+                saveDataToGitHub();
+                renderAdminView();
+                showToast("Rifa eliminada.");
+            }
         };
 
         // --- SORTEO Y AVISO AUTOMÁTICO AL GANADOR ---
@@ -772,7 +870,7 @@
             document.getElementById('winnerTicket').innerText = `Boleto #${winner.numero}`; 
             winnerDisplay.classList.remove('hidden'); 
             
-            // IDEA 1: Enviar WhatsApp automático al ganador
+            // Aviso automático al ganador por WhatsApp
             setTimeout(() => {
                 const tel = winner.telefono.replace(/[^0-9]/g, '');
                 const msg = `¡Felicidades ${winner.nombre}! 🎉 Has ganado la rifa de ${rifa.name} con el boleto #${winner.numero}. Ponte en contacto con nosotros para reclamar tu premio.`;
@@ -784,7 +882,7 @@
 
         window.exportExcel = (id) => { const rifa = db.rifas.find(r => r.id === id); if (!rifa) return; const ws = XLSX.utils.json_to_sheet(rifa.participantes.map(p => ({ Nombre: p.nombre, Teléfono: p.telefono, Boleto: p.numero }))); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Participantes"); XLSX.writeFile(wb, `${rifa.name}_participantes.xlsx`); };
 
-        // --- HISTORIAL CLIENTE (IDEA 5) ---
+        // --- HISTORIAL CLIENTE ---
         function renderClientHistory() {
             const grid = document.getElementById('historyGridContainer');
             grid.innerHTML = '';
@@ -834,13 +932,19 @@
                 const pendientes = rifa.solicitudes ? rifa.solicitudes.length : 0;
                 const notifBadge = pendientes > 0 ? `<div class="absolute top-2 left-1/2 transform -translate-x-1/2 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full bounce-notif shadow-lg z-10">🔔 ${pendientes} Nuevas</div>` : '';
                 let btns = `<div class="flex gap-2 mt-3"><button onclick="openRifaDetails('${rifa.id}')" class="flex-1 bg-cyan-600/80 hover:bg-cyan-500 text-white text-sm font-bold py-2 rounded-lg transition">📋 Ver Detalles</button></div>`;
+                
                 if (rifa.winner) {
-                    btns = `<div class="mt-3 text-center text-yellow-400 font-bold p-2 bg-yellow-500/10 rounded-lg">🏆 Ganador: ${rifa.winner.nombre} (#${rifa.winner.numero})</div>`;
+                    btns = `<div class="mt-3 flex flex-col gap-2 text-center text-white font-bold p-3 bg-gradient-to-r from-green-600 to-teal-600 rounded-xl shadow-lg">
+                                ✅ SORTEO FINALIZADO <br>
+                                <span class="text-yellow-300 text-sm">🏆 Ganador: ${rifa.winner.nombre} (#${rifa.winner.numero})</span>
+                            </div>
+                            <button onclick="deleteRifaDirect('${rifa.id}')" class="w-full mt-2 bg-red-600/80 hover:bg-red-500 text-white text-sm font-bold py-2 rounded-lg transition">🗑️ Eliminar Rifa</button>`;
                 } else if (rifa.countdownActive && Date.now() >= rifa.countdownEndTime) {
                     btns = `<button onclick="drawWinner('${rifa.id}')" class="w-full mt-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-3 rounded-xl animate-pulse">🎉 SORTear GANADOR</button>`;
                 } else if (!rifa.countdownActive) {
-                    btns += `<button onclick="startCountdown('${rifa.id}')" class="w-full mt-3 bg-yellow-600/80 hover:bg-yellow-500 text-white text-sm font-bold py-2 rounded-lg">⏱️ Iniciar Conteo</button>`;
+                    btns += `<button onclick="startCountdown('${rifa.id}')" class="w-full mt-3 bg-yellow-600/80 hover:bg-yellow-500 text-white text-sm font-bold py-2 rounded-lg">⏱️ Iniciar Sorteo</button>`;
                 }
+
                 const card = document.createElement('div'); card.className = 'glass rounded-2xl overflow-hidden flex flex-col relative';
                 card.innerHTML = `
                     ${notifBadge}
