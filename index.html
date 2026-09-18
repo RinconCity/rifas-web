@@ -134,7 +134,7 @@
     </div>
 
     <!-- VISTA GESTIÓN CLIENTES -->
-    <div id="clientsView" class="hidden w-full max-w-5xl mx-auto relative z-10 py-4">
+    <div id="clientsView" class="hidden w-full max-w-7xl mx-auto relative z-10 py-4">
         <header class="flex justify-between items-center mb-8 pb-6 border-b border-white/10">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-300">Gestión de Clientes</h1>
             <button id="clientsBackToDashBtn" class="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition border border-white/10 font-medium flex items-center gap-2">⬅️ Dashboard</button>
@@ -154,7 +154,8 @@
             <button type="button" id="createUserBtn" class="w-full mt-6 bg-gradient-to-r from-cyan-500 to-purple-600 text-white font-bold py-4 px-6 rounded-xl transition">Crear Cliente y Generar ID</button>
         </div>
         <h3 class="text-xl font-bold mb-4 text-gray-300">Clientes Registrados (Toca para editar)</h3>
-        <div id="usersList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        <!-- Modificada la cuadrícula para que tenga más columnas y las tarjetas sean más estrechas -->
+        <div id="usersList" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
     </div>
 
     <!-- VISTA EDITAR CLIENTE -->
@@ -413,8 +414,8 @@
 
         function renderUsers() {
             usersList.innerHTML = db.usuarios.length === 0 ? '<p class="text-gray-500 col-span-full text-center py-6">Sin clientes registrados.</p>' : db.usuarios.map(u => `
-                <div onclick="openEditUser('${u.id}')" class="flex flex-col items-center text-center gap-3 bg-white/5 p-6 rounded-xl cursor-pointer hover:bg-white/10 transition border border-white/10">
-                    <img src="${u.foto}" class="w-24 h-24 rounded-full object-cover border-4 border-cyan-500/50 flex-shrink-0 shadow-lg">
+                <div onclick="openEditUser('${u.id}')" class="flex flex-col items-center text-center gap-4 bg-white/5 py-8 px-4 rounded-xl cursor-pointer hover:bg-white/10 transition border border-white/10 h-full">
+                    <img src="${u.foto}" class="w-28 h-28 rounded-full object-cover border-4 border-cyan-500/50 flex-shrink-0 shadow-lg">
                     <div class="w-full">
                         <p class="font-bold text-lg truncate">${u.nombre}</p>
                         <p class="text-sm text-gray-400 mt-1">${u.telefono}</p>
