@@ -437,11 +437,11 @@
             const name = document.getElementById('editUserName').value;
             const tel = document.getElementById('editUserPhone').value.replace(/[^0-9]/g, '');
             const pageLink = "https://rinconcity.github.io/rifas-web/";
-            const msg = `Hola ${name}! Este es tu ID para entrar en la pagina de rifas: ${id}\n\nEntra a este link y usa tu ID para ver las rifas disponibles:\n${pageLink}`;
+            const msg = `Hola ${name}! Este es tu ID para entrar in la pagina de rifas: ${id}\n\nEntra a este link y usa tu ID para ver las rifas disponibles:\n${pageLink}`;
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank');
         });
 
-        // --- GITHUB API (Con manejo de errores de red) ---
+        // --- GITHUB API (Revertida a la versión simple que funcionaba) ---
         function encodeBase64(str) { const bytes = new TextEncoder().encode(str); let binary = ''; for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]); return btoa(binary); }
         function decodeBase64(b64) { const binary = atob(b64); const bytes = new Uint8Array(binary.length); for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i); return new TextDecoder('utf-8').decode(bytes); }
         const FILE_PATH = "data/db.json";
@@ -449,12 +449,9 @@
 
         async function loadDataFromGitHub() {
             try {
-                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
-                    headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache' },
-                    cache: 'no-store'
-                });
+                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
                 if (res.status === 404) { db = { rifas: [], usuarios: [] }; currentSha = null; renderAll(); startCarousel(); return; }
-                if (!res.ok) throw new Error("GitHub rechazó el acceso. Revisa tu Token.");
+                if (!res.ok) throw new Error("Error al cargar");
                 const data = await res.json();
                 currentSha = data.sha;
                 const content = decodeBase64(data.content);
@@ -462,14 +459,7 @@
                 db.rifas.forEach(r => { if(!r.solicitudes) r.solicitudes = []; if(!r.participantes) r.participantes = []; if(r.transitionTime === undefined) r.transitionTime = 3000; });
                 db.usuarios.forEach(u => { if(!u.password) u.password = ""; });
                 renderAll(); startCarousel();
-            } catch (e) {
-                console.error("Error de carga:", e);
-                let errMsg = e.message;
-                if (e.message === "Failed to fetch") {
-                    errMsg = "Error de red. Revisa tu conexión a internet, desactiva el bloqueador de anuncios (AdBlock) en esta página, o intenta con un VPN.";
-                }
-                alert("Error al cargar de GitHub.\n\nMotivo: " + errMsg);
-            }
+            } catch (e) { alert("Error al cargar de GitHub."); }
         }
 
         async function saveDataToGitHub() {
@@ -483,26 +473,16 @@
                 });
                 if (!res.ok) throw new Error("Error al guardar");
                 const data = await res.json(); currentSha = data.content.sha;
-            } catch (e) { 
-                console.error("Error de guardado:", e);
-                let errMsg = e.message;
-                if (e.message === "Failed to fetch") {
-                    errMsg = "Error de red al guardar. Revisa tu conexión o desactiva el AdBlock.";
-                }
-                alert("Error al guardar en GitHub.\n\nMotivo: " + errMsg); 
-            }
+            } catch (e) { alert("Error al guardar. Recarga la página."); }
             isSaving = false; saveIndicator.style.display = 'none';
         }
 
-        // --- SINCRONIZACIÓN AUTOMÁTICA ---
+        // --- SINCRONIZACIÓN AUTOMÁTICA (Revertida a 15s y simple fetch) ---
         async function syncData() {
             if (!currentSha || isSaving || !currentUser) return;
             syncIndicator.style.display = 'block';
             try {
-                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}?t=${Date.now()}`, { 
-                    headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json', 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache', 'Expires': '0' },
-                    cache: 'no-store'
-                });
+                const res = await fetch(`https://api.github.com/repos/${GH_USER}/${GH_REPO}/contents/${FILE_PATH}`, { headers: { 'Authorization': `token ${GH_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' } });
                 if (!res.ok) return;
                 const data = await res.json();
                 if (data.sha !== currentSha) {
@@ -518,12 +498,12 @@
                         db.rifas.forEach(r => { if (r.solicitudes.length > (prevPendientes[r.id] || 0)) newRequests = true; });
                     }
                     refreshCurrentView(); 
-                    if (newRequests && currentUser.role === 'admin') { showToast("🔔 ¡Tienes nuevas solicitudes de participación!"); }
+                    if (newRequests && currentUser.role === 'admin') { showToast("🔔 ¡Tienes nuevas solicitudes!"); }
                 }
             } catch (e) { console.error("Error de sincronización", e); }
             syncIndicator.style.display = 'none';
         }
-        setInterval(syncData, 5000);
+        setInterval(syncData, 15000);
 
         function refreshCurrentView() {
             if (!adminView.classList.contains('hidden')) renderAdminView();
@@ -711,7 +691,7 @@
                 sendBtn.innerText = "Enviar Petición";
                 if (!currentSelectedNumber) {
                     sendBtn.classList.add('opacity-50', 'cursor-not-allowed', 'bg-green-600');
-                    sendBtn.onclick = () => {}; // No action
+                    sendBtn.onclick = () => {};
                 } else {
                     sendBtn.classList.add('bg-green-600', 'hover:bg-green-500');
                     sendBtn.onclick = () => {
@@ -732,7 +712,6 @@
             currentSelectedNumber = num;
             const rifa = db.rifas.find(r => r.id === currentDetailsId);
             updateClientRifaButtonState(rifa);
-            // Update visual state of buttons
             const grid = document.getElementById('numberGridContainer');
             Array.from(grid.children).forEach(btn => {
                 if (parseInt(btn.innerText) === num && !btn.disabled) {
@@ -745,7 +724,6 @@
             });
         }
 
-        // Botón rápido de cancelar en la tarjeta del cliente
         window.cancelRequest = function(rifaId) {
             if (!confirm("¿Seguro que deseas cancelar tu solicitud de participación?")) return;
             const rifa = db.rifas.find(r => r.id === rifaId);
